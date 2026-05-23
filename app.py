@@ -452,6 +452,9 @@ from core.auth import (
 )
 
 def init_db():
+    if env_bool('SKIP_DB_INIT', False):
+        print("[DB] SKIP_DB_INIT=true; inicializacao do banco ignorada para demo/local.")
+        return
     init_postgres_db()
     conn = get_db()
     seed_default_gestor(conn)

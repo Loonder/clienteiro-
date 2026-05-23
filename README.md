@@ -77,6 +77,7 @@ Variaveis importantes:
 - `SECRET_KEY`
 - `INTERNAL_API_KEY`
 - `SUPABASE_DB_URL` ou `DATABASE_URL`
+- `SKIP_DB_INIT`: use `true` para abrir em modo demo/local sem banco; use `false` com PostgreSQL configurado para o painel completo
 - `DEFAULT_ADMIN_PASS`
 - `EVOLUTION_API_KEY`, se a integracao Evolution for usada
 - `GEMINI_API_KEY`, se os recursos de IA do bot forem usados
@@ -99,6 +100,8 @@ python -m venv .venv
 pip install -r requirements.txt
 python app.py
 ```
+
+Com o `.env.example`, a aplicacao sobe em modo demo/local sem inicializar banco. Para usar o painel administrativo completo, configure uma URL PostgreSQL/Supabase em `SUPABASE_DB_URL` e altere `SKIP_DB_INIT=false`.
 
 Bot:
 
