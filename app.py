@@ -1820,9 +1820,9 @@ def admin_agenda():
 # â”€â”€ Entry point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 if __name__ == '__main__':
-    print("\nðŸš€ Clienteiro â€” AutomaÃ§Ã£o Inteligente de Clientes")
-    print("ðŸ‘‰ Kiosk : http://localhost:3583")
-    print("ðŸ“Š Export: http://localhost:3583/admin/export\n")
+    print("\nClienteiro - Automacao Inteligente de Clientes")
+    print("Kiosk : http://localhost:3583")
+    print("Admin : http://localhost:3583/admin\n")
     port = int(os.getenv('PORT', '3583'))
     host = os.getenv('FLASK_RUN_HOST', '127.0.0.1')
     app.run(debug=False, port=port, host=host, threaded=True)
