@@ -1,62 +1,83 @@
 # Clienteiro
 
-Plataforma de prospeccao, qualificacao e atendimento automatizado para transformar leads brutos em oportunidades comerciais acompanhaveis.
+Clienteiro e uma plataforma Python para prospeccao, qualificacao e atendimento automatizado de leads. O projeto demonstra um fluxo comercial completo: captura do contato, scoring, painel administrativo, auditoria, LGPD, roleta/kiosk para eventos e continuidade via WhatsApp.
 
-O projeto combina uma aplicacao Flask, um painel administrativo, fluxo LGPD, geracao de relatorios, roleta/kiosk para eventos e um bot de WhatsApp em Node.js. A proposta e simples: captar, qualificar, priorizar e acompanhar contatos com rastreabilidade operacional.
+O foco do projeto e mostrar como uma aplicacao backend em Python pode organizar uma operacao real de vendas, com regras de negocio, seguranca, persistencia, testes e deploy conteinerizado.
 
-## Visao Geral
-
-Clienteiro foi desenhado para demonstrar uma operacao comercial ponta a ponta:
+## Principais Recursos
 
 - Captura e organizacao de leads por nicho, cidade e origem.
-- Scoring para priorizar oportunidades com maior chance de conversao.
-- Painel admin para acompanhar leads, eventos, configuracoes e auditoria.
-- Kiosk/roleta para ativacoes presenciais e feiras.
-- Bot de WhatsApp para continuidade do atendimento e agendamento.
-- Trilhas de LGPD com consentimento, retencao, exclusao e auditoria.
-- Deploy conteinerizado com Docker e Docker Compose.
+- Scoring para priorizar contatos com maior potencial comercial.
+- Painel administrativo com acompanhamento de leads e indicadores.
+- Kiosk/roleta para ativacoes presenciais.
+- Fluxo LGPD com consentimento, retencao e solicitacoes do titular.
+- Bot de WhatsApp em Node.js para apoio ao atendimento.
+- Webhook da roleta integrado a provider externo de WhatsApp.
+- Docker Compose para execucao da stack.
+- Testes automatizados e auditoria de seguranca.
+
+## Como Python Foi Usado
+
+Python e o nucleo do projeto. Ele foi usado para construir a aplicacao principal com Flask e para concentrar as regras de negocio.
+
+- `app.py`: inicializa a aplicacao Flask, rotas web, APIs, seguranca, CSRF, rate limit e integracoes.
+- `core/`: contem processamento, scoring, conexao com banco, autenticacao, scraping e geracao de relatorios.
+- `services/`: organiza casos de uso como autenticacao, leads e LGPD.
+- `tests/`: valida regras de negocio, autenticacao, fallback de processamento e endpoints.
+- `requirements.txt`: fixa as dependencias Python usadas em producao e nos testes.
+
+Bibliotecas Python relevantes:
+
+- Flask para backend web.
+- Flask-WTF para CSRF e formularios.
+- Flask-Limiter para rate limiting.
+- Flask-Talisman para headers de seguranca.
+- psycopg2 para PostgreSQL/Supabase.
+- fpdf2 e qrcode para relatorios e artefatos.
+- pytest para testes.
+- Bandit e Safety para auditoria de seguranca.
 
 ## Stack
 
-- Backend: Python, Flask, Flask-WTF, Flask-Limiter, Flask-Talisman.
-- Banco: PostgreSQL/Supabase em producao; SQLite apenas para desenvolvimento legado/local.
-- Bot: Node.js, Express, whatsapp-web.js e provider Evolution opcional.
-- Frontend: HTML, CSS e JavaScript sem framework.
-- Qualidade: pytest, Bandit e Safety.
-- Deploy: Docker, Docker Compose e Gunicorn.
+- Backend principal: Python 3.11, Flask e Gunicorn.
+- Banco de dados: PostgreSQL/Supabase em producao.
+- Frontend: HTML, CSS e JavaScript.
+- Bot: Node.js, Express e whatsapp-web.js/Evolution provider.
+- Deploy: Docker e Docker Compose.
+- Qualidade: pytest, Bandit, Safety e npm audit.
 
 ## Estrutura
 
 ```text
 .
 |-- app.py                         # Aplicacao Flask principal
-|-- core/                          # Processamento, scoring, DB, auth e relatorios
-|-- services/                      # Casos de uso de auth, leads e LGPD
-|-- templates/                     # Telas web
+|-- core/                          # Regras centrais, scoring, DB, auth e relatorios
+|-- services/                      # Casos de uso de leads, auth e LGPD
+|-- templates/                     # Telas HTML
 |-- static/                        # CSS, imagens e manifest
 |-- tests/                         # Testes automatizados Python
-|-- whatsapp_bot/                  # Bot de WhatsApp
+|-- whatsapp_bot/                  # Bot de WhatsApp em Node.js
 |-- roulette/                      # Frontend da roleta
 |-- roulette_webhook/              # Webhook Node.js da roleta
-|-- production_assets/             # Artes de producao
 |-- docker-compose.yml             # Stack principal
-|-- Dockerfile                     # Imagem da aplicacao Flask
-|-- .env.example                   # Modelo seguro de variaveis
+|-- Dockerfile                     # Imagem da aplicacao Python
+|-- .env.example                   # Modelo seguro de configuracao
 ```
 
 ## Seguranca
 
-O repositorio foi preparado para ser publicado sem segredos reais. Arquivos como `.env`, bancos locais, QR codes, sessoes do WhatsApp, chaves privadas e arquivos de credenciais sao ignorados pelo Git.
+Este repositorio foi preparado para publicacao academica sem segredos reais. Arquivos de ambiente, bancos locais, sessoes de WhatsApp, QR codes, chaves privadas e tokens estao bloqueados por `.gitignore` e `.dockerignore`.
 
-Antes de publicar ou apresentar:
+Regras adotadas:
 
-1. Confirme que `git status --short` nao mostra `.env`, `.db`, QR code, sessao ou credencial.
-2. Gere valores fortes para `SECRET_KEY`, `INTERNAL_API_KEY`, senhas iniciais e tokens externos.
-3. Rotacione qualquer token que ja tenha sido usado em arquivo versionado no passado.
-4. Nunca rode producao com os placeholders `CHANGE_ME_*`.
-5. Use HTTPS e proxy reverso com headers preservando `X-Forwarded-*`.
+- `.env` real nunca deve ser versionado.
+- `.env.example` contem somente placeholders.
+- `SECRET_KEY` e `INTERNAL_API_KEY` devem ser gerados com valores fortes.
+- Credenciais temporarias devem ser trocadas apos o primeiro acesso.
+- Dependencias foram auditadas com Safety e npm audit.
+- Codigo Python foi checado com Bandit para achados de alta severidade.
 
-Gerar chaves locais:
+Gerar chaves fortes:
 
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(64))"
@@ -64,21 +85,21 @@ python -c "import secrets; print(secrets.token_urlsafe(64))"
 
 ## Variaveis de Ambiente
 
-Crie os arquivos locais a partir dos modelos:
+Crie os arquivos locais a partir dos exemplos:
 
 ```bash
 cp .env.example .env
 cp whatsapp_bot/.env.example whatsapp_bot/.env
 ```
 
-Variaveis obrigatorias em producao:
+Variaveis principais:
 
 - `SECRET_KEY`: chave de sessao Flask.
 - `INTERNAL_API_KEY`: chave compartilhada entre backend e bot.
 - `SUPABASE_DB_URL` ou `DATABASE_URL`: conexao PostgreSQL.
-- `DEFAULT_ADMIN_PASS`: senha temporaria do primeiro diretor, removida/trocada apos o primeiro boot.
-- `EVOLUTION_API_KEY`: apenas se a integracao Evolution estiver habilitada.
-- `GEMINI_API_KEY`: apenas se os recursos de IA do bot estiverem habilitados.
+- `DEFAULT_ADMIN_PASS`: senha temporaria do primeiro diretor.
+- `EVOLUTION_API_KEY`: usada se a integracao Evolution estiver ativa.
+- `GEMINI_API_KEY`: usada se recursos de IA do bot estiverem ativos.
 
 ## Como Rodar com Docker
 
@@ -86,16 +107,16 @@ Variaveis obrigatorias em producao:
 docker compose up -d --build
 ```
 
-Servicos principais:
+Servicos:
 
 - Aplicacao web: `http://localhost:3580`
-- Backend Flask no container: porta interna `3583`
+- Backend Flask: porta interna `3583`
 - Bot WhatsApp: porta interna `3582`
 - Webhook da roleta: porta interna `3000`
 
 ## Como Rodar Localmente
 
-Backend:
+Backend Python:
 
 ```bash
 python -m venv .venv
@@ -104,7 +125,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Bot:
+Bot WhatsApp:
 
 ```bash
 cd whatsapp_bot
@@ -128,59 +149,40 @@ Testes Python:
 pytest -q
 ```
 
-Auditoria estatica Python:
+Auditoria Python:
 
 ```bash
-bandit -r . -x .venv,tests,__pycache__
-```
-
-Dependencias Python:
-
-```bash
+bandit -r app.py core services test_db.py -x tests -q --severity-level high
 safety check -r requirements.txt
 ```
 
-Busca local por possiveis segredos:
+Auditoria Node:
 
 ```bash
-rg -n --hidden -S "(SECRET|PASSWORD|TOKEN|API_KEY|PRIVATE KEY|DATABASE_URL)" -g "!.git" -g "!.venv" -g "!__pycache__"
+npm --prefix whatsapp_bot audit --audit-level=high --omit=dev
+npm --prefix roulette_webhook audit --audit-level=high --omit=dev
 ```
 
-## LGPD
+Varredura simples de segredos:
 
-O projeto inclui camadas para operar com responsabilidade:
+```bash
+rg -n --hidden -S "(SECRET|PASSWORD|TOKEN|API_KEY|PRIVATE KEY|DATABASE_URL|postgresql://)" -g "!.git" -g "!.venv" -g "!node_modules"
+```
 
-- Registro de consentimento e versao do termo.
-- Base legal configuravel.
-- Retencao de leads por janela definida.
-- Fluxos de exclusao e auditoria.
-- Documentos de apoio em `LGPD_READINESS.md`, `templates/privacy.html` e `templates/terms.html`.
+## Resultado de Validacao
 
-## Fluxo de Producao
+Na preparacao desta versao publica:
 
-Checklist recomendado:
+- `pytest -q`: 44 testes passaram.
+- `safety check -r requirements.txt`: nenhuma vulnerabilidade conhecida reportada.
+- `bandit --severity-level high`: nenhum achado de alta severidade.
+- `npm audit` no bot e webhook: nenhuma vulnerabilidade alta reportada.
+- Varredura de segredos conhecidos: sem achados.
 
-1. Preencher `.env` com valores reais e fortes.
-2. Rodar migracoes/inicializacao necessarias.
-3. Subir a stack com Docker Compose.
-4. Acessar o painel admin e trocar credenciais temporarias.
-5. Validar captura, dashboard, LGPD, roleta e bot.
-6. Rodar `pytest`, `bandit` e auditoria de segredos antes de publicar.
+## Observacao Para Avaliacao
 
-## Observacoes para a Banca
-
-Clienteiro nao e apenas uma landing page. Ele entrega um ciclo operacional completo:
-
-- Entrada do lead.
-- Qualificacao e scoring.
-- Visualizacao gerencial.
-- Acionamento por WhatsApp.
-- Controle de consentimento.
-- Auditoria de eventos.
-- Deploy conteinerizado.
-
-Isso permite avaliar arquitetura, seguranca, produto, operacao e aderencia a LGPD em um mesmo projeto.
+Clienteiro nao e apenas uma interface. O projeto demonstra backend Python, organizacao em servicos, persistencia, seguranca, testes, integracao com Node.js, deploy em Docker e preocupacao com LGPD. A arquitetura foi pensada para representar um produto funcional e apresentavel em ambiente academico.
 
 ## Licenca
 
-Projeto academico/demonstrativo. Ajuste a licenca conforme a politica do grupo antes de publicacao definitiva.
+Projeto academico/demonstrativo.
