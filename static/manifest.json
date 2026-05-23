@@ -1,0 +1,17 @@
+{
+  "name": "Clienteiro PRO",
+  "short_name": "Clienteiro",
+  "description": "Plataforma de mineração de leads B2B com IA.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FF6A00",
+  "icons": [
+    {
+      "src": "/static/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

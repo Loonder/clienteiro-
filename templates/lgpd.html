@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canal LGPD | Clienteiro PRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #060606;
+            --card: #101010;
+            --text: #f2f2f2;
+            --muted: #a0a0a0;
+            --primary: #ff7a18;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #1d1d1d, #060606 55%);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            padding: 32px 20px;
+        }
+        .wrap {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .back {
+            display: inline-block;
+            color: var(--primary);
+            margin-bottom: 18px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        h1 {
+            margin: 0 0 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 34px;
+            color: var(--primary);
+        }
+        p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 0 0 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #eaeaea;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #0b0b0b;
+            color: #fff;
+            margin-bottom: 14px;
+            font: inherit;
+        }
+        textarea { min-height: 120px; resize: vertical; }
+        button {
+            width: 100%;
+            border: 0;
+            border-radius: 10px;
+            padding: 13px;
+            background: var(--primary);
+            color: #131313;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .result {
+            display: none;
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.45);
+            color: #d5ffe3;
+        }
+        .error {
+            display: none;
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.13);
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            color: #ffdede;
+        }
+        .support {
+            margin-top: 18px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <a class="back" href="/">Voltar ao inicio</a>
+        <div class="card">
+            <h1>Canal de Direitos LGPD</h1>
+            <p>Use este canal para solicitar confirmacao de tratamento, acesso, correcao, anonimizacao, eliminacao, portabilidade ou revogacao de consentimento.</p>
+
+            <form id="lgpdForm">
+                <label for="requester_name">Nome do titular</label>
+                <input id="requester_name" name="requester_name" maxlength="100" required>
+
+                <label for="request_type">Tipo de solicitacao</label>
+                <select id="request_type" name="request_type" required>
+                    <option value="">Selecione...</option>
+                    <option value="confirmacao">Confirmacao de tratamento</option>
+                    <option value="acesso">Acesso aos dados</option>
+                    <option value="correcao">Correcao de dados</option>
+                    <option value="anonimizacao">Anonimizacao</option>
+                    <option value="eliminacao">Eliminacao</option>
+                    <option value="portabilidade">Portabilidade</option>
+                    <option value="revogacao_consentimento">Revogacao de consentimento</option>
+                </select>
+
+                <label for="requester_phone">Telefone (opcional)</label>
+                <input id="requester_phone" name="requester_phone" maxlength="30">
+
+                <label for="requester_email">Email (opcional)</label>
+                <input id="requester_email" name="requester_email" maxlength="120" type="email">
+
+                <label for="message">Detalhes</label>
+                <textarea id="message" name="message" maxlength="1000"></textarea>
+
+                <button type="submit">Registrar solicitacao</button>
+            </form>
+
+            <div id="result" class="result"></div>
+            <div id="error" class="error"></div>
+            <div class="support">Contato do encarregado: {{ dpo_email }}</div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('lgpdForm');
+        const resultBox = document.getElementById('result');
+        const errorBox = document.getElementById('error');
+
+        form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            resultBox.style.display = 'none';
+            errorBox.style.display = 'none';
+
+            const payload = Object.fromEntries(new FormData(form).entries());
+            try {
+                const res = await fetch('/api/lgpd/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok || !data.ok) {
+                    errorBox.textContent = data.error || 'Falha ao registrar solicitacao.';
+                    errorBox.style.display = 'block';
+                    return;
+                }
+                resultBox.textContent = `Solicitacao registrada com sucesso. Protocolo: ${data.protocol}`;
+                resultBox.style.display = 'block';
+                form.reset();
+            } catch (err) {
+                errorBox.textContent = 'Erro de rede. Tente novamente.';
+                errorBox.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

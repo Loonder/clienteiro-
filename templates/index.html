@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Clienteiro | Automação Inteligente de Clientes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .kiosk-badge {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffb37a;
+      background: rgba(255, 106, 0, 0.12);
+      border: 1px solid rgba(255, 106, 0, 0.3);
+      user-select: none;
+      pointer-events: none;
+    }
+    .kiosk-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: #ff6a00;
+      box-shadow: 0 0 10px rgba(255, 106, 0, 0.9);
+      animation: kioskPulse 1.5s infinite ease-in-out;
+    }
+    .kiosk-guard {
+      position: fixed;
+      inset: 0;
+      z-index: 99998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: rgba(5, 5, 5, 0.98);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      padding: 2rem;
+      cursor: pointer;
+    }
+    .kiosk-guard-content {
+      max-width: 560px;
+      border: 1px solid rgba(255, 106, 0, 0.3);
+      background: rgba(20, 20, 20, 0.85);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+    }
+    .kiosk-guard h3 {
+      font-size: 1.35rem;
+      margin-bottom: 0.75rem;
+    }
+    .kiosk-guard p {
+      color: #c9c9c9;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .kiosk-exit-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(6px);
+      padding: 1rem;
+    }
+    .kiosk-exit-card {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 106, 0, 0.35);
+      background: #111;
+      padding: 1.5rem;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    }
+    .kiosk-exit-card h4 {
+      margin-bottom: 0.6rem;
+      font-size: 1.12rem;
+      color: #fff;
+    }
+    .kiosk-exit-card p {
+      margin-bottom: 1rem;
+      color: #b8b8b8;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .kiosk-pin-input {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.85rem 0.9rem;
+      margin-bottom: 0.85rem;
+      outline: none;
+    }
+    .kiosk-pin-input:focus {
+      border-color: rgba(255, 106, 0, 0.75);
+      box-shadow: 0 0 0 3px rgba(255, 106, 0, 0.2);
+    }
+    .kiosk-exit-actions {
+      display: flex;
+      gap: 0.7rem;
+      justify-content: flex-end;
+    }
+    .kiosk-exit-error {
+      min-height: 1.15rem;
+      color: #ff8b8b;
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+    @keyframes kioskPulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <main class="container" style="position: relative;">
+    <div class="kiosk-badge" aria-hidden="true">
+      <span class="kiosk-dot"></span>
+      Modo Kiosk Protegido
+    </div>
+
+    <header class="hero">
+      <div class="badge">Clienteiro Pro &#8226; Automação 2026</div>
+      <h1 class="title">CLIENTEIRO</h1>
+      <p class="subtitle">Diagnóstico inteligente para escalar sua prospecção e atendimento.</p>
+      <div class="hero-row">
+        <span class="pill">IA Generativa</span>
+        <span class="pill">Hunter Scraper</span>
+        <span class="pill">WhatsApp Business</span>
+      </div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Entrada de dados</h2>
+          <p>Preencha os dados básicos. Nossa IA faz o enriquecimento em tempo real.</p>
+        </div>
+        <div class="panel-badge">Versão 2.4-PRO</div>
+      </div>
+
+      <form id="checkForm" novalidate>
+        <div class="section-title">Identificação</div>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="user_name">Identificação do Estrategista</label>
+            <input type="text" id="user_name" placeholder="Ex: Diretor de Vendas" maxlength="60" autocomplete="name" required>
+          </div>
+          <div class="input-group">
+            <label for="company_name">Nome do seu Negócio</label>
+            <input type="text" id="company_name" placeholder="Ex: Agência Elite" maxlength="80" autocomplete="organization" required>
+          </div>
+        </div>
+
+        <div class="section-title">Segmento Alvo</div>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="nicho">Quem você quer prospectar hoje?</label>
+            <select id="nicho" required style="padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+              <option value="">Selecione o nicho alvo...</option>
+              <option value="Dentista">Dentista / Odontologia</option>
+              <option value="Advogado">Advogado / Juridico</option>
+              <option value="Academia de Ginastica">Academia / Fitness</option>
+              <option value="Restaurante">Restaurante / Alimentacao</option>
+              <option value="Pizzaria">Pizzaria</option>
+              <option value="Pet Shop">Pet Shop / Veterinaria</option>
+              <option value="Salao de Beleza">Salao de Beleza</option>
+              <option value="Barbearia">Barbearia</option>
+              <option value="Oficina Mecanica">Oficina Mecanica</option>
+              <option value="Imobiliaria">Imobiliaria / Corretores</option>
+              <option value="Contabilidade">Contabilidade / BPO</option>
+              <option value="Escola Infantil">Escola Infantil / Educacao</option>
+              <option value="Clinica Estetica">Clinica Estetica</option>
+              <option value="Informatica">Informatica / T.I</option>
+              <option value="Arquitetura">Arquitetura / Engenharia</option>
+              <option value="Autoescola">Autoescola</option>
+              <option value="Grafica">Grafica / Impressao</option>
+              <option value="Fotografo">Fotografo / Studio</option>
+              <option value="Lavanderia">Lavanderia</option>
+              <option value="Farmacia">Farmacia</option>
+              <option value="Otica">Otica</option>
+              <option value="Floricultura">Floricultura</option>
+              <option value="Concessionaria">Concessionaria / Autos</option>
+              <option value="Papelaria">Papelaria</option>
+              <option value="Mercado">Mercado / Mercearia</option>
+              <option value="Chaveiro">Chaveiro</option>
+              <option value="Costureira">Costureira / Atelier</option>
+              <option value="Loja de Celular">Loja de Celular</option>
+              <option value="Bicicletaria">Bicicletaria</option>
+              <option value="Sorveteria">Sorveteria</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="city">Onde estão seus clientes? (Região)</label>
+            <select id="city" required style="padding: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+              <option value="">Selecione a cidade...</option>
+              <option value="Sao Paulo">São Paulo (Capital)</option>
+              <option value="Guarulhos">Guarulhos</option>
+              <option value="Campinas">Campinas</option>
+              <option value="Sao Bernardo do Campo">São Bernardo do Campo</option>
+              <option value="Santo Andre">Santo André</option>
+              <option value="Osasco">Osasco</option>
+              <option value="Sao Jose dos Campos">São José dos Campos</option>
+              <option value="Ribeirao Preto">Ribeirão Preto</option>
+              <option value="Sorocaba">Sorocaba</option>
+              <option value="Santos">Santos (Litoral)</option>
+              <option value="Maua">Mauá</option>
+              <option value="Sao Jose do Rio Preto">São José do Rio Preto</option>
+              <option value="Mogi das Cruzes">Mogi das Cruzes</option>
+              <option value="Jundiai">Jundiaí</option>
+              <option value="Piracicaba">Piracicaba</option>
+              <option value="Barueri">Barueri</option>
+              <option value="Bauru">Bauru</option>
+              <option value="Botucatu">Botucatu</option>
+              <option value="Carapicuiba">Carapicuíba</option>
+              <option value="Cotia">Cotia</option>
+              <option value="Diadema">Diadema</option>
+              <option value="Franca">Franca</option>
+              <option value="Indaiatuba">Indaiatuba</option>
+              <option value="Itapevi">Itapevi</option>
+              <option value="Itaquaquecetuba">Itaquaquecetuba</option>
+              <option value="Jacarei">Jacareí</option>
+              <option value="Limeira">Limeira</option>
+              <option value="Marilia">Marília</option>
+              <option value="Praia Grande">Praia Grande</option>
+              <option value="Presidente Prudente">Presidente Prudente</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title">Contato</div>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="user_phone">WhatsApp (com DDD)</label>
+            <input type="tel" id="user_phone" placeholder="(11) 99999-0000" inputmode="numeric" maxlength="16" required>
+            <span class="input-hint">Usamos apenas para entregar o diagnóstico e contato estratégico.</span>
+          </div>
+          <div class="input-group consent">
+            <label class="checkbox-container">
+              <input type="checkbox" id="can_call" required>
+              Autorizo o tratamento dos meus dados para diagnostico e contato comercial. (Obrigatorio)
+            </label>
+            <span class="input-hint">
+              Ao continuar, voce concorda com a
+              <a href="/privacy" target="_blank" rel="noopener">Politica de Privacidade</a>,
+              <a href="/terms" target="_blank" rel="noopener">Termos</a> e
+              <a href="/lgpd" target="_blank" rel="noopener">Canal LGPD</a>.
+            </span>
+          </div>
+        </div>
+
+        <div class="section-title">Perfil de Atuação</div>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="type_focus">Tipo de Foco</label>
+            <select id="type_focus" onchange="toggleCollegeFields()">
+              <option value="b2b">Empresarial / Comercial (B2B)</option>
+              <option value="b2p">Influenciadores / Pessoas (B2P)</option>
+              <option value="college">Ecossistema Universitário</option>
+            </select>
+          </div>
+          <div class="input-group" id="college_field" style="display:none">
+            <label for="dept">Departamento / Entidade</label>
+            <input type="text" id="dept" placeholder="Ex: Atlética, D.A, Coordenação" maxlength="60">
+          </div>
+        </div>
+
+        <div class="section-title">Canais Ativos</div>
+        <div class="checkbox-grid">
+          <label class="check-item">
+            <input type="checkbox" id="has_instagram">
+            Instagram
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="has_whatsapp">
+            WhatsApp Business
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="is_automated">
+            Usa Automações
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="has_website">
+            Possui Site/LP
+          </label>
+        </div>
+
+        <div class="section-title">Identidade (Opcional)</div>
+        <div class="form-grid">
+          <div class="input-group" style="grid-column: span 2;">
+            <label for="logo">Logo ou foto</label>
+            <input type="file" id="logo" accept="image/*" class="file-input">
+            <span class="input-hint">PNG ou JPG até 5MB.</span>
+          </div>
+        </div>
+
+        <div id="error" class="alert error" role="alert"></div>
+        
+        <div id="honeypot-container" style="display:none !important; visibility:hidden !important; position:absolute; left:-9999px;">
+          <input type="text" name="email_confirm_2" id="email_confirm_2" tabindex="-1" autocomplete="off">
+        </div>
+        
+        <!-- ðŸ§  AI Scanner Visual -->
+        <div id="ai-scanner" class="ai-scanner">
+          <div class="scanner-bar"></div>
+          <div class="scanner-content">
+            <div class="scanner-header">
+              <span class="scanner-title">MOTOR DE IA ATIVO</span>
+              <span class="scanner-percent" id="scan-percent">0%</span>
+            </div>
+            <div id="status" class="scanner-status" role="status" aria-live="polite">Aguardando comando...</div>
+            <div class="scanner-grid">
+              <div class="grid-line"></div><div class="grid-line"></div>
+              <div class="grid-line"></div><div class="grid-line"></div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary pulse-primary" id="submitBtn">
+          <span class="btn-text">Gerar Diagnóstico Clienteiro</span>
+          <span class="btn-loader" id="loader"></span>
+        </button>
+      </form>
+
+      <div id="locked" class="locked-state">
+        <div class="locked-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <h3>Diagnóstico Concluído!</h3>
+        <p style="margin-bottom: 1.5rem;">Agradecemos sua participação. Seu relatório foi enviado.</p>
+        <p style="margin: 0; color: var(--muted); font-size: 0.85rem;">A tela será preparada automaticamente para o próximo participante.</p>
+      </div>
+
+      <div id="result" class="result-area">
+        <div class="result-badge">IA Processando...</div>
+        <h3>Relatório Clienteiro Gerado!</h3>
+        <p>Enviamos os dados completos para o seu WhatsApp cadastrado.</p>
+
+        <a id="pdfLink" class="pdf-card" href="#" target="_blank" rel="noopener">
+          <div class="pdf-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-weight: 800; color: #fff; margin-bottom: 0.2rem;">Visualizar PDF</div>
+            <div style="font-size: 0.75rem; color: var(--muted);">Prévia detalhada do diagnóstico</div>
+          </div>
+        </a>
+
+        <div class="result-actions">
+          <button type="button" class="btn-primary" id="reloadBtn" style="max-width: 400px;">
+            PRÓXIMA CONSULTA EM (<span id="countdown">6</span>S)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>&copy; 2026 Clienteiro - Automacao Inteligente de Clientes</p>
+    </footer>
+  </main>
+
+  <div id="kioskGuard" class="kiosk-guard" role="dialog" aria-modal="true" aria-label="Protecao kiosk ativa">
+    <div class="kiosk-guard-content">
+      <h3>Sessao protegida</h3>
+      <p id="kioskGuardMessage">Clique em qualquer area para retomar a tela protegida do kiosk.</p>
+    </div>
+  </div>
+
+  <div id="kioskExitModal" class="kiosk-exit-modal" role="dialog" aria-modal="true" aria-label="Saida administrativa do kiosk">
+    <div class="kiosk-exit-card">
+      <h4>Saida administrativa</h4>
+      <p>Digite o PIN de seguranca para encerrar o modo kiosk.</p>
+      <input id="kioskPinInput" class="kiosk-pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN de seguranca" maxlength="20">
+      <div id="kioskExitError" class="kiosk-exit-error"></div>
+      <div class="kiosk-exit-actions">
+        <button type="button" id="kioskCancelBtn" class="btn-ghost">Cancelar</button>
+        <button type="button" id="kioskConfirmBtn" class="btn-primary" style="width: auto; margin-top: 0; padding: 0.85rem 1.1rem; font-size: 0.9rem;">Sair do Kiosk</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NEXT_LEAD_SECONDS = 6;
+    const KIOSK_SECRET_COMBO = {{ kiosk_secret_combo|tojson }};
+
+    const form = document.getElementById('checkForm');
+    const locked = document.getElementById('locked');
+    const errorBox = document.getElementById('error');
+    const statusBox = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+    const loader = document.getElementById('loader');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const resultBox = document.getElementById('result');
+    const pdfLink = document.getElementById('pdfLink');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const countdownEl = document.getElementById('countdown');
+    const kioskGuard = document.getElementById('kioskGuard');
+    const kioskGuardMessage = document.getElementById('kioskGuardMessage');
+    const kioskExitModal = document.getElementById('kioskExitModal');
+    const kioskPinInput = document.getElementById('kioskPinInput');
+    const kioskExitError = document.getElementById('kioskExitError');
+    const kioskConfirmBtn = document.getElementById('kioskConfirmBtn');
+    const kioskCancelBtn = document.getElementById('kioskCancelBtn');
+    const blockedLooseKeys = new Set(['TAB', 'ESCAPE', 'CONTEXTMENU']);
+    let kioskUnlocked = false;
+    let nextLeadTimer = null;
+
+    function parseCombo(rawCombo) {
+      const combo = { ctrl: false, shift: false, alt: false, meta: false, key: '' };
+      const parts = String(rawCombo || '').toUpperCase().split('+').map((p) => p.trim()).filter(Boolean);
+      parts.forEach((part) => {
+        if (part === 'CTRL' || part === 'CONTROL') combo.ctrl = true;
+        else if (part === 'SHIFT') combo.shift = true;
+        else if (part === 'ALT') combo.alt = true;
+        else if (part === 'META' || part === 'WIN' || part === 'CMD') combo.meta = true;
+        else combo.key = part;
+      });
+      if (!combo.key) combo.key = 'U';
+      return combo;
+    }
+
+    const secretCombo = parseCombo(KIOSK_SECRET_COMBO);
+
+    function comboMatches(event) {
+      const expectedCtrl = secretCombo.ctrl;
+      const expectedShift = secretCombo.shift;
+      const expectedAlt = secretCombo.alt;
+      const expectedMeta = secretCombo.meta;
+      if (event.ctrlKey !== expectedCtrl) return false;
+      if (event.shiftKey !== expectedShift) return false;
+      if (event.altKey !== expectedAlt) return false;
+      if (event.metaKey !== expectedMeta) return false;
+
+      const key = String(event.key || '').toUpperCase();
+      const code = String(event.code || '').toUpperCase();
+      const wanted = secretCombo.key;
+      if (wanted.length === 1) return key === wanted;
+      if (wanted.startsWith('KEY')) return code === wanted;
+      return key === wanted || code === wanted;
+    }
+
+    const showError = (msg) => {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    };
+
+    const clearError = () => {
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+    };
+
+    const showStatus = (msg) => {
+      statusBox.textContent = msg;
+      statusBox.style.display = 'block';
+    };
+
+    const clearStatus = () => {
+      statusBox.style.display = 'none';
+      statusBox.textContent = '';
+    };
+
+    function resetKioskForNextLead() {
+      if (nextLeadTimer) {
+        clearInterval(nextLeadTimer);
+        nextLeadTimer = null;
+      }
+
+      form.reset();
+      toggleCollegeFields();
+      clearError();
+      clearStatus();
+
+      const aiScanner = document.getElementById('ai-scanner');
+      const scanPercent = document.getElementById('scan-percent');
+      if (aiScanner) aiScanner.style.display = 'none';
+      if (scanPercent) scanPercent.textContent = '0%';
+
+      submitBtn.disabled = false;
+      btnText.textContent = 'Gerar Diagnostico Clienteiro';
+      loader.style.display = 'none';
+
+      resultBox.style.display = 'none';
+      if (locked) locked.style.display = 'none';
+      form.style.display = 'block';
+
+      if (countdownEl) countdownEl.textContent = String(NEXT_LEAD_SECONDS);
+
+      pdfLink.style.display = 'none';
+      pdfLink.removeAttribute('href');
+    }
+
+    function scheduleNextLeadReset() {
+      if (nextLeadTimer) clearInterval(nextLeadTimer);
+      let timeLeft = NEXT_LEAD_SECONDS;
+      if (countdownEl) countdownEl.textContent = String(timeLeft);
+
+      nextLeadTimer = setInterval(() => {
+        timeLeft -= 1;
+        if (countdownEl) countdownEl.textContent = String(Math.max(0, timeLeft));
+        if (timeLeft <= 0) {
+          resetKioskForNextLead();
+        }
+      }, 1000);
+    }
+
+    function setKioskGuardMessage(text) {
+      kioskGuardMessage.textContent = text;
+      kioskGuard.style.display = 'flex';
+    }
+
+    function hideKioskGuard() {
+      kioskGuard.style.display = 'none';
+    }
+
+    async function enterKioskFullscreen() {
+      if (kioskUnlocked) return;
+      if (document.fullscreenElement) {
+        hideKioskGuard();
+        return;
+      }
+      try {
+        await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+        hideKioskGuard();
+      } catch (e) {
+        setKioskGuardMessage('Clique para continuar em tela protegida.');
+      }
+    }
+
+    function openExitModal() {
+      kioskExitError.textContent = '';
+      kioskPinInput.value = '';
+      kioskExitModal.style.display = 'flex';
+      setTimeout(() => kioskPinInput.focus(), 0);
+    }
+
+    function closeExitModal() {
+      kioskExitModal.style.display = 'none';
+      kioskExitError.textContent = '';
+    }
+
+    async function confirmKioskExit() {
+      const pin = kioskPinInput.value.trim();
+      if (!pin) {
+        kioskExitError.textContent = 'Informe o PIN.';
+        return;
+      }
+
+      kioskConfirmBtn.disabled = true;
+      kioskExitError.textContent = '';
+      try {
+        const res = await fetch('/api/kiosk/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pin })
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !payload.ok) {
+          kioskExitError.textContent = payload.error || 'PIN invalido.';
+          return;
+        }
+
+        kioskUnlocked = true;
+        closeExitModal();
+        if (document.fullscreenElement) {
+          await document.exitFullscreen().catch(() => {});
+        }
+        window.location.href = '/';
+      } catch (err) {
+        kioskExitError.textContent = 'Falha ao validar PIN.';
+      } finally {
+        kioskConfirmBtn.disabled = false;
+      }
+    }
+
+    function shouldBlockKey(event) {
+      if (kioskUnlocked) return false;
+      if (comboMatches(event)) return false;
+
+      const key = String(event.key || '').toUpperCase();
+      const code = String(event.code || '').toUpperCase();
+      const isFunction = /^F\d{1,2}$/.test(key) || /^F\d{1,2}$/.test(code);
+
+      if (isFunction) return true;
+      if (blockedLooseKeys.has(key)) return true;
+      if (event.altKey || event.metaKey) return true;
+      if (event.ctrlKey) return true;
+      return false;
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (comboMatches(event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        openExitModal();
+        return;
+      }
+      if (shouldBlockKey(event)) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, true);
+
+    ['keyup', 'keypress'].forEach((eventName) => {
+      document.addEventListener(eventName, (event) => {
+        if (shouldBlockKey(event)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }, true);
+    });
+
+    ['contextmenu', 'dragstart', 'drop', 'selectstart', 'copy', 'paste', 'cut'].forEach((eventName) => {
+      document.addEventListener(eventName, (event) => {
+        if (!kioskUnlocked) event.preventDefault();
+      }, true);
+    });
+
+    kioskGuard.addEventListener('click', () => {
+      enterKioskFullscreen();
+    });
+    kioskCancelBtn.addEventListener('click', closeExitModal);
+    kioskConfirmBtn.addEventListener('click', confirmKioskExit);
+    kioskPinInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        confirmKioskExit();
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      if (kioskUnlocked) return;
+      if (!document.fullscreenElement) {
+        setKioskGuardMessage('Clique para retomar a tela protegida do kiosk.');
+      } else {
+        hideKioskGuard();
+      }
+    });
+
+    window.addEventListener('blur', () => {
+      if (!kioskUnlocked) {
+        setKioskGuardMessage('Sessao protegida ativa. Clique para retomar o kiosk.');
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (kioskUnlocked) return;
+      if (document.visibilityState === 'visible' && !document.fullscreenElement) {
+        setKioskGuardMessage('Clique para retornar ao modo kiosk.');
+      }
+    });
+
+    document.addEventListener('pointerdown', () => {
+      if (!kioskUnlocked && !document.fullscreenElement && kioskExitModal.style.display !== 'flex') {
+        enterKioskFullscreen();
+      }
+    }, { passive: true });
+
+    resetKioskForNextLead();
+    enterKioskFullscreen();
+
+    reloadBtn.addEventListener('click', () => {
+      resetKioskForNextLead();
+    });
+
+    function toggleCollegeFields() {
+      const focus = document.getElementById('type_focus').value;
+      const field = document.getElementById('college_field');
+      const input = document.getElementById('dept');
+      const show = focus === 'college';
+      field.style.display = show ? 'block' : 'none';
+      input.required = show;
+    }
+
+    toggleCollegeFields();
+
+    const phoneInput = document.getElementById('user_phone');
+    phoneInput.addEventListener('input', () => {
+      const digits = phoneInput.value.replace(/\D/g, '').slice(0, 11);
+      if (!digits) {
+        phoneInput.value = '';
+        return;
+      }
+      if (digits.length <= 2) {
+        phoneInput.value = `(${digits}`;
+        return;
+      }
+      if (digits.length <= 7) {
+        phoneInput.value = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+        return;
+      }
+      phoneInput.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const userName = document.getElementById('user_name').value.trim();
+      const companyName = document.getElementById('company_name').value.trim();
+      const nicho = document.getElementById('nicho').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const phoneDigits = document.getElementById('user_phone').value.replace(/\D/g, '');
+      const typeFocus = document.getElementById('type_focus').value;
+      const dept = document.getElementById('dept').value.trim();
+
+      if (!userName) return showError('Informe seu nome.');
+      if (!companyName) return showError('Empresa obrigatoria.');
+      if (!nicho) return showError('Segmento obrigatorio.');
+      if (!city) return showError('Cidade obrigatoria.');
+      if (phoneDigits.length < 10) return showError('WhatsApp invalido.');
+      if (!document.getElementById('can_call').checked) return showError('Autorize o tratamento de dados.');
+      if (typeFocus === 'college' && !dept) return showError('Entidade universitaria obrigatoria.');
+
+      const logoFile = document.getElementById('logo').files[0];
+      if (logoFile && logoFile.size > 5 * 1024 * 1024) {
+        return showError('Logo muito grande. Envie um arquivo de ate 5MB.');
+      }
+
+      submitBtn.disabled = true;
+      btnText.textContent = 'Processando...';
+      loader.style.display = 'inline-block';
+      showStatus('Buscando oportunidades no radar...');
+
+      const statusMsgs = [
+        'Iniciando Motor de Inferencia...',
+        'Injetando Hunter Scraper em threads paralelas...',
+        'Enriquecendo dados via Data Lake Supabase...',
+        'Analisando maturidade digital do nicho...',
+        'Calculando Score de Autoridade...',
+        'Gerando ganchos de venda persuasivos...',
+        'Consolidando relatorio VIP em PDF...',
+        'Finalizando entrega estrategica...'
+      ];
+
+      let idx = 0;
+      const aiScanner = document.getElementById('ai-scanner');
+      const scanPercent = document.getElementById('scan-percent');
+      aiScanner.style.display = 'block';
+
+      const interval = setInterval(() => {
+        if (idx < statusMsgs.length) {
+          const progress = Math.round((idx / statusMsgs.length) * 100);
+          scanPercent.textContent = `${progress}%`;
+          showStatus(statusMsgs[idx++]);
+        }
+      }, 1500);
+
+      const fd = new FormData();
+      fd.append('user_name', userName);
+      fd.append('company_name', companyName);
+      fd.append('nicho', nicho);
+      fd.append('city', city);
+      fd.append('user_phone', document.getElementById('user_phone').value.trim());
+      fd.append('can_call', document.getElementById('can_call').checked ? 'true' : 'false');
+      fd.append('type_focus', typeFocus);
+      fd.append('dept', dept);
+      fd.append('has_instagram', document.getElementById('has_instagram').checked ? 'true' : 'false');
+      fd.append('has_whatsapp', document.getElementById('has_whatsapp').checked ? 'true' : 'false');
+      fd.append('has_website', document.getElementById('has_website').checked ? 'true' : 'false');
+      fd.append('is_automated', document.getElementById('is_automated').checked ? 'true' : 'false');
+      fd.append('email_confirm_2', document.getElementById('email_confirm_2').value);
+      if (logoFile) fd.append('logo', logoFile);
+
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const res = await fetch('/submit', { 
+          method: 'POST', 
+          body: fd,
+          headers: {
+            'X-CSRFToken': csrfToken
+          }
+        });
+        const payload = await res.json().catch(() => ({}));
+
+        if (!res.ok || !payload.ok) {
+          showError(payload.error || 'Erro ao processar.');
+          submitBtn.disabled = false;
+          btnText.textContent = 'Gerar Diagnostico Clienteiro';
+          loader.style.display = 'none';
+          clearStatus();
+          clearInterval(interval);
+          return;
+        }
+
+        form.style.display = 'none';
+        if (locked) locked.style.display = 'none';
+        resultBox.style.display = 'block';
+
+        if (payload.pdf_url) {
+          pdfLink.href = payload.pdf_url;
+          pdfLink.style.display = 'flex';
+        } else {
+          pdfLink.style.display = 'none';
+        }
+
+        scheduleNextLeadReset();
+      } catch (err) {
+        console.error(err);
+        showError('Erro de conexao.');
+        submitBtn.disabled = false;
+        btnText.textContent = 'Gerar Diagnostico Clienteiro';
+        clearStatus();
+      } finally {
+        clearInterval(interval);
+      }
+    });
+  </script>
+</body>
+</html>

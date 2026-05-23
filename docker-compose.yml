@@ -1,0 +1,86 @@
+services:
+  # 1. Kiosk & API (Python)
+  backend:
+    build: .
+    container_name: clienteiro-backend
+    ports:
+      - "3583:3583"
+    env_file:
+      - .env
+    environment:
+      - PORT=3583
+      - LEADS_SOURCE=db
+      - LEADS_FALLBACK=live
+      - ENABLE_LIVE_SCRAPING=true
+      - BOT_STATUS_URL=http://localhost:3582/status
+    volumes:
+      - ./reports:/app/reports
+    restart: always
+    cpus: 0.60
+    mem_limit: 800m
+    deploy:
+      resources:
+        limits:
+          cpus: '0.60'
+          memory: 800M
+
+  # 2. WhatsApp Bot (Node.js)
+  bot:
+    build: ./whatsapp_bot
+    container_name: clienteiro-bot
+    profiles:
+      - bot
+    env_file:
+      - .env
+    environment:
+      - PORT=3582
+      - NODE_ENV=production
+      - BACKEND_HOST=localhost
+      - BACKEND_PORT=3583
+      - ENABLE_BOT=true
+    volumes:
+      - ./whatsapp_bot/.wwebjs_auth:/app/.wwebjs_auth
+    restart: always
+    cpus: 0.40
+    mem_limit: 600m
+    deploy:
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 600M
+
+  harvester:
+    build: .
+    container_name: clienteiro-harvester
+    profiles:
+      - harvest
+    env_file:
+      - .env
+    environment:
+      - ENABLE_HARVEST=true
+      - LEADS_SOURCE=live
+      - ENABLE_LIVE_SCRAPING=true
+      - HARVEST_MAX_CYCLES=0
+      - HARVEST_MAX_RUNTIME_MIN=0
+    command: ["python", "harvest_leads.py", "1"]
+    restart: "no"
+    cpus: 0.90
+    mem_limit: 1200m
+
+  # 4. Roulette webhook (Node.js + Evolution API)
+  roulette-webhook:
+    build: ./roulette_webhook
+    container_name: clienteiro-roulette-webhook
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+      - EVOLUTION_BASE_URL=${EVOLUTION_BASE_URL:-http://evolution-api:8080}
+      - EVOLUTION_INSTANCE=${EVOLUTION_INSTANCE}
+      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY}
+      - PRIZE_PDF_URL=${PRIZE_PDF_URL:-https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf}
+    ports:
+      - "3000:3000"
+    restart: always
+    cpus: 0.20
+    mem_limit: 256m

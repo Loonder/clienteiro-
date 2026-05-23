@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar Conta Grátis | Clienteiro PRO</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/favicon.png">
+  <meta property="og:title" content="Clienteiro PRO — Criar Conta">
+  <meta property="og:image" content="https://clienteiro.com.br/static/og-image.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #FF6A00;
+      --bg: #000;
+      --card: rgba(10, 10, 10, 0.95);
+      --border: rgba(255, 106, 0, 0.15);
+      --text: #F0F2F5;
+      --muted: rgba(240,242,245,0.5);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .register-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* --- Left Side: Visual/Image --- */
+    .visual-side {
+      flex: 1;
+      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url('/static/login-visual.png');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 5rem;
+      border-right: 1px solid var(--border);
+    }
+
+    @media (max-width: 1000px) {
+      .visual-side { display: none; }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 2rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    .brand i { color: var(--primary); }
+
+    .visual-content h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -1px;
+    }
+
+    .visual-content p {
+      color: var(--muted);
+      max-width: 400px;
+      font-size: 1.1rem;
+    }
+
+    /* --- Right Side: Form --- */
+    .form-side {
+      flex: 0.8;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 5rem;
+      background: #050505;
+    }
+
+    @media (max-width: 600px) {
+      .form-side { padding: 2rem; }
+    }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    .title span { color: var(--primary); }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      color: #FFF;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 106, 0, 0.05);
+      box-shadow: 0 0 20px rgba(255,106,0,0.1);
+    }
+
+    .btn {
+      width: 100%;
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,106,0,0.3);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    .flash {
+      background: rgba(239, 68, 68, 0.1);
+      color: #EF4444;
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="register-container">
+    <div class="visual-side">
+      <div class="brand">
+        <i data-lucide="zap" fill="currentColor"></i>
+        CLIENTE<span>IRO</span>
+      </div>
+      <div class="visual-content">
+        <h2>Escale sua<br>prospecção.</h2>
+        <p>Junte-se a centenas de empresas que utilizam inteligência de dados para encontrar clientes ideais no automático.</p>
+      </div>
+    </div>
+
+    <div class="form-side">
+      <div class="card">
+        <h2 class="title">CRIAR MINHA <span>CONTA</span></h2>
+        <p class="subtitle">Comece sua jornada de mineração de leads.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash" style="{{ 'background: rgba(16,185,129,0.1); color: #10B981; border-color: rgba(16,185,129,0.2);' if category == 'success' else '' }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/register">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="form-group">
+            <label>Nome Completo</label>
+            <input type="text" name="nome" placeholder="Ex: Lucas Silva" required>
+          </div>
+
+          <div class="form-group">
+            <label>Nome de Usuário (@)</label>
+            <input type="text" name="nome_usuario" placeholder="Ex: lucas_consultor" required>
+          </div>
+
+          <div class="form-group">
+            <label>Cargo / Profissão</label>
+            <input type="text" name="cargo" placeholder="Ex: Especialista B2B" required>
+          </div>
+
+          {% if session.get('nivel_acesso') == 'diretor' %}
+          <div class="form-group">
+            <label>Nível de Acesso (Staff)</label>
+            <select name="nivel_acesso" required>
+              <option value="consultor">Consultor</option>
+              <option value="diretor">Diretor (Full Access)</option>
+            </select>
+          </div>
+          {% endif %}
+
+          <div class="form-group">
+            <label>Cupom / Código de Acesso (Opcional)</label>
+            <input type="text" name="cupom" placeholder="Ex: CLIENTEIRO30">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 2rem;">
+            <label>Senha de Acesso</label>
+            <input type="password" name="senha" placeholder="••••••••" required>
+          </div>
+
+          <button type="submit" class="btn">Criar Minha Conta Agora</button>
+        </form>
+
+        <a href="/" class="back-link">← Voltar para o Início</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

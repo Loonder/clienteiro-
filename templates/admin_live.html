@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clienteiro - Monitor Live</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Orbitron:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0A0B;
+      --panel: rgba(20, 20, 22, 0.7);
+      --accent: #FF7A18;
+      --accent-glow: rgba(255, 106, 0, 0.3);
+      --success: #10B981;
+      --muted: rgb(156, 163, 175);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(circle at 50% 10%, rgba(255,106,0,0.05), transparent 70%);
+      color: #FFFFFF;
+      font-family: 'Space Grotesk', sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden; 
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+    }
+
+    header {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      margin-bottom: 1rem;
+    }
+
+    .live-indicator { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; color: var(--accent); }
+    .blink-dot { width: 8px; height: 8px; background-color: red; border-radius: 50%; animation: pulse 1s infinite alternate; box-shadow: 0 0 8px red; }
+    @keyframes pulse { from { opacity: 0.4; } to { opacity: 1; } }
+    header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; letter-spacing: 1px; }
+    header h1 span { color: var(--accent); }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1.5rem;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .kpi-board {
+      flex-shrink: 0;
+      background: var(--panel);
+      border: 1px solid rgba(255,106,0,0.15);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(10px);
+    }
+    .kpi-board h2 { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-value { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 3rem; background: linear-gradient(135deg, #FFF, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; line-height: 1; }
+    .target-panel {
+      background: rgba(10, 12, 18, 0.72);
+      border: 1px solid rgba(36, 215, 255, 0.28);
+      border-radius: 14px;
+      padding: 0.9rem;
+      backdrop-filter: blur(10px);
+      display: grid;
+      gap: 0.7rem;
+    }
+    .target-head { display:flex; align-items:center; justify-content:space-between; gap: 0.8rem; }
+    .target-title {
+      font-size: 0.66rem;
+      color: #24D7FF;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 800;
+    }
+    .target-badge {
+      font-size: 0.62rem;
+      color: #10B981;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.28);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .preset-row { display:flex; flex-wrap: wrap; gap: 0.45rem; }
+    .preset-btn {
+      border: 1px solid rgba(255, 106, 0, 0.28);
+      background: rgba(255, 106, 0, 0.10);
+      color: #ffb170;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .preset-btn:hover { filter: brightness(1.1); }
+    .target-input {
+      width: 100%;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #E5E7EB;
+      border-radius: 8px;
+      padding: 0.52rem 0.62rem;
+      font-size: 0.72rem;
+      outline: none;
+    }
+    .target-input:focus { border-color: rgba(36, 215, 255, 0.45); }
+    .target-actions { display:flex; gap: 0.5rem; }
+    .target-actions button {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.5rem 0.65rem;
+      cursor: pointer;
+    }
+    .btn-target-save {
+      border-color: rgba(36, 215, 255, 0.45);
+      color: #24D7FF;
+      background: rgba(36, 215, 255, 0.09);
+    }
+    .btn-target-save:hover { filter: brightness(1.1); }
+    .btn-target-reset {
+      border-color: rgba(255,255,255,0.17);
+      color: #d1d5db;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .feed-container {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      padding-right: 0.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,106,0,0.5) transparent;
+    }
+
+    .feed-container::-webkit-scrollbar { width: 6px; }
+    .feed-container::-webkit-scrollbar-thumb { background: rgba(255,106,0,0.5); border-radius: 10px; }
+
+    .lead-card {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.01);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.4s ease forwards;
+    }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    .lead-card.new-lead { border: 1px solid var(--accent); background: rgba(255, 106, 0, 0.04); box-shadow: 0 0 10px rgba(255,106,0,0.1); }
+    .lead-info h3 { font-size: 0.95rem; color: #FFF; margin-bottom: 0.4rem; font-weight: 600; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
+    .chip { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.03); color: #d1d5db; }
+    .chip-city { border-color: rgba(148, 163, 184, 0.25); color: #cbd5e1; }
+    .chip-nicho { border-color: rgba(255, 106, 0, 0.35); background: rgba(255, 106, 0, 0.12); color: #ffb170; }
+    
+    .actions-row { margin-top: 0.3rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .action-link { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 700; text-decoration: none; border: 1px solid transparent; transition: all 0.2s ease; cursor: pointer; }
+    .action-map { background: rgba(255,106,0,0.15); color: var(--accent); border-color: rgba(255,106,0,0.3); }
+    .action-wa { background: rgba(37,211,102,0.16); color: #25D366; border-color: rgba(37,211,102,0.28); }
+    .action-google { background: rgba(255,255,255,0.06); color: #fff; border-color: rgba(255,255,255,0.14); }
+    .action-link:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .score-badge { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--accent); font-size: 1.1rem; }
+
+    /* 💻 TERMINAL DE LOGS */
+    .terminal-wrapper {
+      flex: 1;
+      min-height: 0;
+      background: #050505;
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      padding: 1rem;
+    }
+
+    .terminal-header {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      z-index: 10;
+    }
+
+    .terminal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      color: #00FF41;
+      letter-spacing: 1px;
+    }
+
+    .btn-start { background: rgba(0, 255, 65, 0.1); border: 1px solid #00FF41; color: #00FF41; padding: 6px 14px; border-radius: 6px; font-family: 'Orbitron', sans-serif; font-size: 0.7rem; cursor: pointer; font-weight: 700; transition: all 0.3s; }
+    .btn-start:hover { background: #00FF41; color: #000; box-shadow: 0 0 10px rgba(0,255,65,0.4); }
+    .lead-type-select {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(0, 255, 65, 0.45);
+      color: #a7f3d0;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .terminal-box {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #00FF41;
+      line-height: 1.3rem;
+      padding-right: 0.5rem;
+      padding-bottom: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,255,65,0.5) transparent;
+      z-index: 10;
+    }
+
+    .terminal-box::-webkit-scrollbar { width: 6px; }
+    .terminal-box::-webkit-scrollbar-thumb { background: rgba(0,255,65,0.5); border-radius: 10px; }
+
+    .log-line { opacity: 0.9; white-space: pre-wrap; margin-bottom: 0.2rem; }
+
+    /* --- Mobile & Tablets Fixes --- */
+    @media (max-width: 900px) {
+      body { height: auto; min-height: 100vh; overflow: auto; }
+      .main-grid { display: flex; flex-direction: column; overflow: visible; }
+      .terminal-wrapper { min-height: 400px; margin-bottom: 1rem; flex: none; height: 400px; }
+      .left-col, .right-col { height: auto; flex: none; }
+      .feed-container { overflow: visible; flex: none; }
+      .target-actions { flex-direction: column; }
+    }
+  </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png">
+    <link rel="apple-touch-icon" href="/static/favicon.png">
+</head>
+<body>
+
+  <header>
+    <h1>CLIENTE<span>IRO</span> PRO</h1>
+    <div class="live-indicator">
+      <div class="blink-dot"></div>
+      LIVE STREAMING
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- ðŸŸ¢ Coluna Esquerda: Terminal de Logs + KPI -->
+    <div class="left-col">
+      <div class="kpi-board" style="display:flex; justify-content:space-between; align-items:center; padding: 1rem 1.5rem;">
+        <div style="text-align:left;">
+          <h2>Leads Encontrados</h2>
+          <div style="font-size: 0.65rem; color: var(--success)">ON Motores conectados e operando</div>
+        </div>
+        <div class="kpi-value" id="kpi-total" style="font-size: 2.5rem; margin:0;">0</div>
+      </div>
+
+      <div class="target-panel">
+        <div class="target-head">
+          <div class="target-title">Hunter Alvos no Live</div>
+          <div class="target-badge" id="hunter-live-badge">SYNC_ACTIVE</div>
+        </div>
+        <div class="preset-row">
+          <button class="preset-btn" type="button" onclick="applyLivePreset('saude')">Saude</button>
+          <button class="preset-btn" type="button" onclick="applyLivePreset('barbearia')">Barbearia</button>
+          <button class="preset-btn" type="button" onclick="applyLivePreset('restaurantes')">Restaurantes</button>
+          <button class="preset-btn" type="button" onclick="applyLivePreset('imobiliarias')">Imobiliarias</button>
+        </div>
+        <input id="hunter-live-nichos" class="target-input" type="text" placeholder="Nichos: Ex. Barbearia, Estetica">
+        <input id="hunter-live-cidades" class="target-input" type="text" placeholder="Cidades: Ex. Sao Paulo, Guarulhos">
+        <div class="target-actions">
+          <button class="btn-target-save" type="button" onclick="saveLiveHunterConfig()">Aplicar Alvos</button>
+          <button class="btn-target-reset" type="button" onclick="resetLiveHunterConfig()">Padrao</button>
+        </div>
+      </div>
+
+      <!-- ðŸ’» Terminal Live (Agora Centralizado e Expandido) -->
+      <div class="terminal-wrapper" style="position:relative;">
+        <!-- ðŸŒŒ Efeito Matrix Background -->
+        <canvas id="matrix-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.12; pointer-events:none; z-index:0;"></canvas>
+
+        <div class="terminal-header" style="position:relative; z-index:1;">
+          <div class="terminal-title">>_CONSOLE_LOGS_STREAM</div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <select id="lead-type-select" class="lead-type-select" aria-label="Tipo de lead do worker">
+              <option value="b2b" selected>B2B</option>
+              <option value="b2c">B2C</option>
+              <option value="misto">MISTO</option>
+            </select>
+            <button class="btn-start" id="start-btn" onclick="startStream()">INICIAR WORKER</button>
+          </div>
+        </div>
+        <div class="terminal-box" id="log-box" style="position:relative; z-index:1; background: transparent;">
+          <div class="log-line" style="color:#FFF; opacity:0.6;">Aguardando acionamento do motor...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ðŸ”´ Coluna Direita: Cards de Leads Real-time -->
+    <div class="right-col">
+      <div class="terminal-title" style="margin-bottom:0.5rem; color:var(--accent);">FEED DE CAPTURA AO VIVO</div>
+      <div class="feed-container" id="feed-container">
+        <!-- Leads via JS render-->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let seenIds = new Set();
+    let seenLiveKeys = new Set(); // dedup para cards ao vivo (name+phone)
+    const feed = document.getElementById('feed-container');
+    const totalCount = document.getElementById('kpi-total');
+    const logBox = document.getElementById('log-box');
+    const startBtn = document.getElementById('start-btn');
+    const leadTypeSelect = document.getElementById('lead-type-select');
+    const hunterLiveBadge = document.getElementById('hunter-live-badge');
+    const hunterLiveNichos = document.getElementById('hunter-live-nichos');
+    const hunterLiveCidades = document.getElementById('hunter-live-cidades');
+    let pollInterval = null;
+    let currentCursor = 0;
+    const LIVE_PRESETS = {
+      saude: ['Dentista', 'Clinica Estetica', 'Farmacia', 'Clinica Medica'],
+      barbearia: ['Barbearia', 'Salao de Beleza', 'Estetica Masculina'],
+      restaurantes: ['Restaurante', 'Pizzaria', 'Padaria', 'Hamburgueria'],
+      imobiliarias: ['Imobiliaria', 'Corretor de Imoveis']
+    };
+    const DEFAULT_NICHOS = [
+      'Dentista', 'Advogado', 'Academia de Ginastica', 'Restaurante', 'Pizzaria',
+      'Pet Shop', 'Oficina Mecanica', 'Imobiliaria', 'Clinica Estetica'
+    ];
+    const DEFAULT_CIDADES = [
+      'Sao Paulo', 'Guarulhos', 'Campinas', 'Sao Bernardo do Campo',
+      'Santo Andre', 'Osasco', 'Sao Jose dos Campos'
+    ];
+
+    function updateHunterLiveBadge(text, color = '#10B981') {
+      if (!hunterLiveBadge) return;
+      hunterLiveBadge.textContent = text;
+      hunterLiveBadge.style.color = color;
+    }
+
+    function applyLivePreset(key) {
+      const nichos = LIVE_PRESETS[key];
+      if (!nichos || !hunterLiveNichos) return;
+      hunterLiveNichos.value = nichos.join(', ');
+      updateHunterLiveBadge(`PRESET_${key.toUpperCase()}`, '#24D7FF');
+    }
+
+    async function loadLiveHunterConfig() {
+      try {
+        const res = await fetch('/admin/api/hunter_config');
+        const data = await res.json();
+        if (!data.ok || !data.config) return;
+        if (hunterLiveNichos) hunterLiveNichos.value = (data.config.nichos || []).join(', ');
+        if (hunterLiveCidades) hunterLiveCidades.value = (data.config.cidades || []).join(', ');
+      } catch (e) {
+        console.error('[LIVE] Falha ao carregar hunter_config:', e);
+      }
+    }
+
+    async function saveLiveHunterConfig() {
+      const nichos = (hunterLiveNichos?.value || '').trim();
+      const cidades = (hunterLiveCidades?.value || '').trim();
+      if (!nichos || !cidades) {
+        updateHunterLiveBadge('PREENCHA_NICHOS_CIDADES', '#ef4444');
+        return;
+      }
+      try {
+        const res = await fetch('/admin/api/hunter_config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+          },
+          body: JSON.stringify({ nichos, cidades })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          updateHunterLiveBadge('ATUALIZADO_OK', '#10B981');
+          setTimeout(() => updateHunterLiveBadge('SYNC_ACTIVE', '#10B981'), 2200);
+        } else {
+          updateHunterLiveBadge('ERRO_SYNC', '#ef4444');
+        }
+      } catch (e) {
+        console.error('[LIVE] Falha ao salvar hunter_config:', e);
+        updateHunterLiveBadge('ERRO_REDE', '#ef4444');
+      }
+    }
+
+    function resetLiveHunterConfig() {
+      if (hunterLiveNichos) hunterLiveNichos.value = DEFAULT_NICHOS.join(', ');
+      if (hunterLiveCidades) hunterLiveCidades.value = DEFAULT_CIDADES.join(', ');
+      updateHunterLiveBadge('PADRAO_RESTAURADO', '#24D7FF');
+    }
+
+    // Live Feed (Banco de Dados)
+    async function refreshStats() {
+      try {
+        const res = await fetch('/api/live-stats');
+        const data = await res.json();
+        if (totalCount) totalCount.innerText = data.total;
+      } catch (e) {}
+    }
+
+    async function fetchLeads() {
+      try {
+        const res = await fetch('/api/live-feed?limit=12');
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const leads = data.leads;
+        if (!leads || leads.length === 0) {
+          if (feed) {
+            feed.innerHTML = '<div class="lead-card"><div class="lead-info"><h3>Aguardando novos leads...</h3><div class="meta-row"><span class="chip chip-city">LIVE</span></div></div><div class="score-badge">--</div></div>';
+          }
+          return;
+        }
+
+        let html = '';
+
+        leads.forEach((l, index) => {
+          const isNew = !seenIds.has(l.id);
+          seenIds.add(l.id);
+          const cardClass = (isNew && index === 0 && seenIds.size > 15) ? 'lead-card new-lead' : 'lead-card';
+
+          const score = l.clienteiro_score || 0;
+          const company = l.company_name || 'Lead';
+          const city = l.city || 'Cidade';
+          const nicho = l.nicho || 'Nicho';
+
+          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company + " " + city)}`;
+          const waUrl = l.wa_url || '#';
+
+          html += `
+            <div class="${cardClass}">
+              <div style="flex: 1;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                  <div class="lead-info">
+                    <h3>${company}</h3>
+                    <div class="meta-row">
+                        <span class="chip chip-city">Cidade: ${city}</span>
+                        <span class="chip chip-nicho">Nicho: ${nicho}</span>
+                    </div>
+                  </div>
+                  <div class="score-badge">${score}</div>
+                </div>
+                <div class="actions-row">
+                  <a href="${mapsUrl}" target="_blank" class="action-link action-map" title="Buscar no Google Maps">Maps</a>
+                  ${l.wa_url ? `
+                     <a href="${waUrl}" target="_blank" class="action-link action-wa">Whats</a>
+                  ` : ''}
+                  <a href="https://www.google.com/search?q=${encodeURIComponent(company)}" target="_blank" class="action-link action-google">Google</a>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        if (feed) feed.innerHTML = html;
+      } catch (e) {}
+    }
+
+// ── Helper: Gera URL wa.me a partir do número bruto (mesmo quando wa_url não vem no JSON do worker)
+    function makeWaUrl(phone) {
+      if (!phone || phone === 'Ver na Web' || phone === 'N/A') return '';
+      const digits = phone.replace(/\D/g, '');
+      if (!digits) return '';
+      if (digits.startsWith('55') && [12, 13].includes(digits.length)) return `https://wa.me/${digits}`;
+      if ([10, 11].includes(digits.length)) return `https://wa.me/55${digits}`;
+      return '';
+    }
+
+    function prependLiveLeadCard(l) {
+        const companyName = l.company_name || l.name || 'Empresa Geral';
+        const city = l.city || 'Desconhecida';
+        const nicho = l.nicho || 'Geral';
+        const phone = l.phone || '';
+
+        // Deduplicação: ignora se já exibimos este lead ao vivo
+        const liveKey = (companyName + '|' + phone).toLowerCase().trim();
+        if (seenLiveKeys.has(liveKey)) return;
+        seenLiveKeys.add(liveKey);
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(companyName + ' ' + city)}`;
+        // wa_url pode vir do banco (fetchLeads) ou ser calculado do phone (stream do worker)
+        const waUrl = l.wa_url || makeWaUrl(phone);
+        const hasPhone = phone && phone !== 'Ver na Web' && phone !== 'N/A';
+
+        const card = document.createElement('div');
+        card.className = 'lead-card new-lead';
+        card.style.border = '1px solid #10B981';
+        card.style.background = 'rgba(16,185,129,0.04)';
+        card.innerHTML = `
+          <div style="flex: 1;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div class="lead-info">
+                <h3 style="color:#10B981;">[AO VIVO] ${companyName}</h3>
+                <div class="meta-row">
+                    <span class="chip chip-city">Cidade: ${city}</span>
+                    <span class="chip chip-nicho">Nicho: ${nicho}</span>
+                    ${hasPhone ? `<span class="chip" style="border-color:rgba(37,211,102,0.3);background:rgba(37,211,102,0.08);color:#25D366;">&#128222; ${phone}</span>` : ''}
+                </div>
+              </div>
+              <div class="score-badge" style="color:#10B981;">CAPTURANDO...</div>
+            </div>
+            <div class="actions-row">
+              <a href="${mapsUrl}" target="_blank" class="action-link action-map">Maps</a>
+              ${waUrl ? `<a href="${waUrl}" target="_blank" class="action-link action-wa">&#128242; WhatsApp</a>` : ''}
+              <a href="https://www.google.com/search?q=${encodeURIComponent(companyName)}" target="_blank" class="action-link action-google">Google</a>
+            </div>
+          </div>
+        `;
+        feed.prepend(card);
+        const current = parseInt(totalCount.innerText) || 0;
+        totalCount.innerText = current + 1;
+    }
+
+    async function fetchLogs() {
+        try {
+            const res = await fetch('/admin/poll_logs?cursor=' + currentCursor);
+            const data = await res.json();
+            
+            currentCursor = data.cursor;
+            
+            data.logs.forEach(line => {
+                const el = document.createElement('div');
+                el.className = 'log-line';
+                el.innerText = `> ${line}`;
+                logBox.appendChild(el);
+            });
+            
+            // 🔥 PERFORMANCE FIX: Keep only last 200 log lines to completely prevent browser freezes
+            while (logBox.children.length > 200) {
+                logBox.removeChild(logBox.firstChild);
+            }
+            
+            data.leads.forEach(lead => prependLiveLeadCard(lead));
+            
+            if (data.logs.length > 0 || data.leads.length > 0) {
+                // Força o último elemento a entrar na tela para ignorar cortes de padding do navegador
+                logBox.scrollTop = logBox.scrollHeight;
+            }
+
+            // Se o worker parou (processo morreu / removido) e estamos poluindo, pare
+            if (!data.is_running && pollInterval) {
+                // Aguarda limpar o log pra fechar a UI
+                if (data.logs.length === 0) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                    startBtn.innerText = "INICIAR WORKER";
+                    startBtn.style.borderColor = "#00FF41";
+                    startBtn.style.color = "#00FF41";
+                    const line = document.createElement('div');
+                    line.className = 'log-line';
+                    line.innerText = `\n[Motor offline ou processo encerrado]`;
+                    logBox.appendChild(line);
+                    logBox.scrollTop = logBox.scrollHeight;
+                }
+            }
+        } catch(e) {
+            console.error('[LIVE] Falha ao buscar logs do worker:', e);
+        }
+    }
+
+    async function startStream() {
+      if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+          startBtn.innerText = "INICIAR WORKER";
+          startBtn.style.borderColor = "#00FF41";
+          startBtn.style.color = "#00FF41";
+          logBox.innerHTML += '<div class="log-line" style="color:#ef4444;">> [STOP] Desconectando do motor...</div>';
+          logBox.scrollTop = logBox.scrollHeight;
+          try { 
+              await fetch('/admin/stop_worker', {
+                  method: 'POST',
+                  headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+              }); 
+          } catch(e) {}
+          return;
+      }
+
+      startBtn.innerText = "PARAR WORKER";
+      startBtn.style.borderColor = "#ef4444";
+      startBtn.style.color = "#ef4444";
+      logBox.innerHTML = '<div class="log-line" style="color:#00FF41; font-weight:bold;">> Handshake... Enviando comando de start.</div>';
+      currentCursor = 0;
+      seenLiveKeys = new Set(); // limpa dedup ao reiniciar o worker
+      const selectedType = (leadTypeSelect?.value || 'b2b').toLowerCase();
+
+      try {
+          const res = await fetch('/admin/start_worker', { 
+              method: 'POST',
+              headers: {
+                'X-CSRFToken': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ type_focus: selectedType })
+          });
+          const data = await res.json();
+          if (!data.ok && data.error !== 'Worker já está rodando') {
+               logBox.innerHTML += `<div class="log-line" style="color:#ef4444;">> Falha: ${data.error}</div>`;
+               startBtn.innerText = "INICIAR WORKER";
+               startBtn.style.borderColor = "#00FF41";
+               startBtn.style.color = "#00FF41";
+               return;
+          }
+      } catch(e) {
+           console.error('[LIVE] Falha ao acionar start_worker:', e);
+           logBox.innerHTML += '<div class="log-line" style="color:#ef4444;">> Sem resposta do servidor.</div>';
+           return;
+      }
+
+      pollInterval = setInterval(fetchLogs, 800);
+      fetchLogs(); // run first pass immediately
+    }
+
+    // ðŸŒŒ Efeito Matrix Rain no Canvas
+    function initMatrix() {
+      const canvas = document.getElementById('matrix-canvas');
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext('2d');
+      // Ajusta tamanho para a div pai
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+
+      const columns = Math.floor(canvas.width / 14);
+      const drops = new Array(columns).fill(1);
+      const chars = "010101001101".split("");
+
+      function draw() {
+        ctx.fillStyle = "rgba(5, 5, 5, 0.08)"; // Fundo preto com opacidade para rastro
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#00FF41"; // Verde Matrix
+        ctx.font = "12px monospace";
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * 14, drops[i] * 12);
+
+          if (drops[i] * 12 > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+      setInterval(draw, 35);
+      
+      // Ajusta no resize
+      window.addEventListener('resize', () => {
+         canvas.width = canvas.parentElement.offsetWidth;
+         canvas.height = canvas.parentElement.offsetHeight;
+      });
+    }
+
+    // Inicia tudo
+    document.addEventListener("DOMContentLoaded", () => {
+       initMatrix();
+       refreshStats();
+       fetchLeads();
+       loadLiveHunterConfig();
+       setInterval(refreshStats, 5000);
+       // Removido o setInterval do fetchLeads. O fetchLogs() já repassa os novos Leads nativamente a cada 800ms sem apagar a animação CSS (CYANO) da tela!
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Center | Clienteiro PRO</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/favicon.png">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060708;
+      --panel: rgba(14, 16, 22, 0.78);
+      --panel-strong: rgba(18, 20, 26, 0.92);
+      --accent: #FF7A18;
+      --accent-glow: rgba(255, 122, 24, 0.45);
+      --accent-2: #24D7FF;
+      --accent-3: #F6D365;
+      --text: #F8FAFC;
+      --muted: rgba(248, 250, 252, 0.55);
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 122, 24, 0.24);
+      --radius-lg: 26px;
+      --radius-md: 18px;
+      --shadow-premium: 0 24px 60px rgba(0, 0, 0, 0.65);
+      --font-sans: 'Space Grotesk', 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      background-image:
+        radial-gradient(circle at 0% 0%, rgba(255, 122, 24, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 100% 20%, rgba(36, 215, 255, 0.12) 0%, transparent 40%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 70px 70px;
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* --- ðŸ’Ž MasterClass Panels --- */
+    .glass-panel {
+      background: var(--panel);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-premium);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    .header-master {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      margin-top: -1rem;
+    }
+
+    .title-elite {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-transform: uppercase;
+    }
+
+    .title-elite span {
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    /* --- ðŸ“Š Stats Master --- */
+    .stats-master {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-elite {
+      text-align: left;
+      border-left: 3px solid var(--accent);
+      padding-left: 1.2rem;
+    }
+
+    .stat-elite h3 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-elite p {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    /* --- âŒ¨ï¸ Hunter Console (Hacker Style) --- */
+    #hunter-console {
+      background: rgba(0, 0, 0, 0.9);
+      border-radius: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #00FF41;
+      padding: 1rem;
+      height: 150px;
+      overflow-y: auto;
+      border: 1px solid rgba(0, 255, 65, 0.2);
+      margin-bottom: 2rem;
+      box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    #hunter-console::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .live-list::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 10px;
+    }
+
+    /* --- 🏹 Hunter Niche Tags --- */
+    .niche-tag {
+      padding: 0.25rem 0.8rem;
+      border-radius: 99px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      transition: all 0.2s;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .niche-tag:hover {
+      border-color: var(--accent-2);
+      color: var(--accent-2);
+    }
+
+    .niche-tag.active {
+      background: rgba(36, 215, 255, 0.15);
+      border-color: var(--accent-2);
+      color: var(--accent-2);
+    }
+
+    .niche-tag.custom.active {
+      background: rgba(255, 122, 24, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+
+    /* --- 📋 Tables & Kanban Elite --- */
+    .table-elite {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+
+    .table-elite th {
+      padding: 1rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .table-elite tr {
+      transition: transform 0.2s ease;
+    }
+
+    .table-elite tr:hover {
+      transform: scale(1.005);
+    }
+
+    .table-elite td {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.2rem 1rem;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .table-elite td:first-child {
+      border-left: 1px solid var(--glass-border);
+      border-radius: 12px 0 0 12px;
+    }
+
+    .table-elite td:last-child {
+      border-right: 1px solid var(--glass-border);
+      border-radius: 0 12px 12px 0;
+    }
+
+    /* --- ðŸ”˜ Buttons Elite --- */
+    .btn-elite {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      color: var(--text);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-elite:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-elite-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+    }
+
+    .badge-premium {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .chart-box {
+      background: var(--panel);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+    }
+
+    .command-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      margin-top: 1.2rem;
+    }
+
+    .nav-pill {
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-pill.active,
+    .nav-pill:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .live-radar {
+      min-height: 360px;
+    }
+
+    .live-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 0.6rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) transparent;
+    }
+
+    #hunter-console {
+      background: #020202;
+      border: 1px solid rgba(255, 106, 0, 0.1);
+      border-radius: 12px;
+      padding: 1.2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: #00FF41;
+      height: 350px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.4;
+      scrollbar-width: thin;
+      scrollbar-color: #00FF41 transparent;
+    }
+
+    .live-item.new {
+      border-color: var(--accent);
+      background: rgba(255, 122, 24, 0.05);
+      animation: highlight 3s ease-out;
+    }
+
+    @keyframes highlight {
+      0% {
+        box-shadow: 0 0 15px var(--accent);
+      }
+
+      100% {
+        box-shadow: 0 0 0 transparent;
+      }
+    }
+
+    .live-item {
+      background: var(--panel-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 0.8rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .live-item.new {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 1px rgba(36, 215, 255, 0.35), 0 12px 28px rgba(36, 215, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .live-company {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .live-meta {
+      font-size: 0.65rem;
+      color: var(--muted);
+      display: flex;
+      gap: 0.45rem;
+      margin-top: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    .live-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+      color: #d1d5db;
+    }
+
+    .live-chip-city {
+      border-color: rgba(148, 163, 184, 0.25);
+      color: #cbd5e1;
+    }
+
+    .live-chip-nicho {
+      border-color: rgba(255, 122, 24, 0.3);
+      background: rgba(255, 122, 24, 0.12);
+      color: #ffb170;
+    }
+
+    .live-score {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-3);
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    .pulse-elite {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 106, 0, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(255, 106, 0, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 106, 0, 0);
+      }
+    }
+
+    /* --- Mobile & Responsiveness Fixes --- */
+    @media (max-width: 900px) {
+      .header-master {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .header-master>div {
+        flex-wrap: wrap;
+      }
+
+      .chart-container,
+      .section-grid,
+      .kanban-board,
+      .dashboard-grid-major {
+        grid-template-columns: 1fr !important;
+      }
+
+      #tableWrap {
+        overflow-x: auto;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .table-elite {
+        min-width: 800px;
+      }
+
+      body {
+        padding: 1rem;
+      }
+
+      .glass-panel {
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+    }
+
+    .dashboard-grid-major {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header class="glass-panel header-master animate-in">
+    <h1 class="title-elite">CLIENTE<span>IRO</span> PRO</h1>
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+      <div id="bot-status-wrap"
+        style="display: flex; align-items: center; gap: 0.8rem; background: rgba(255,106,0,0.05); padding: 0.6rem 1rem; border-radius: 999px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 800; color: var(--accent);">
+        <span class="pulse-elite"
+          style="width: 10px; height: 10px; background: var(--accent); border-radius: 50%; display: inline-block;"></span>
+        SYSTEM: <span id="status-text">SYNCING...</span>
+      </div>
+      <div style="display: flex; gap: 0.8rem;">
+        {% if nivel_acesso == 'diretor' %}
+        <a href="/admin/audit" class="btn-elite">Audit</a>
+        <a href="/admin/export" class="btn-elite">Export</a>
+        {% endif %}
+        <a href="/admin/live" class="btn-elite"
+          style="background: rgba(0, 209, 255, 0.1); color: var(--accent-2); border-color: var(--accent-2);">LIVE</a>
+        <a href="/logout" class="btn-elite" style="border-color: #ef4444; color: #ef4444;">Exit</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="command-bar animate-in" style="animation-delay: 0.08s;">
+    <button id="btnTable" class="nav-pill active" onclick="setView('table')">Tabela</button>
+    <button id="btnFair" class="nav-pill" onclick="filterFairLeads()"
+      style="border-color: #10b981; color: #10b981;">Leads da Feira</button>
+    <button id="btnKanban" class="nav-pill" onclick="setView('kanban')">Kanban</button>
+    <button id="btnAgenda" class="nav-pill" onclick="setView('agenda')">Agenda</button>
+    {% if nivel_acesso == 'diretor' %}
+    <button id="btnConfig" class="nav-pill" onclick="setView('config')">Config</button>
+    {% endif %}
+  </div>
+
+
+  <!-- ðŸ“Š Master Analytics Section -->
+  <div class="stats-master animate-in" style="animation-delay: 0.1s;">
+    <div class="glass-panel stat-elite">
+      <h3>Total de Leads</h3>
+      <p>{{ kpis.total_leads }}</p>
+    </div>
+    <div class="glass-panel stat-elite">
+      <h3>Leads Hoje</h3>
+      <p>{{ kpis.leads_hoje }}</p>
+    </div>
+    <div class="glass-panel stat-elite">
+      <h3>Hoje Entregues</h3>
+      <p style="color: #10b981">{{ kpis.leads_hoje_printed }}</p>
+    </div>
+    <div class="glass-panel stat-elite">
+      <h3>Aguardando</h3>
+      <p>{{ kpis.leads_aguardando }}</p>
+    </div>
+    <div class="glass-panel stat-elite">
+      <h3>Score Médio</h3>
+      <p style="color: #FFC107">{{ kpis.score_medio }}%</p>
+    </div>
+    <div class="glass-panel stat-elite">
+      <h3>Conversão Geral</h3>
+      <p style="color: #10b981">{{ kpis.taxa_conversao }}%</p>
+    </div>
+  </div>
+
+  <div class="dashboard-grid-major animate-in" style="animation-delay: 0.2s;">
+    <div class="glass-panel" style="margin-bottom: 0;">
+      <h4 style="font-size: 0.75rem; margin-bottom: 1.5rem; color: var(--accent); text-transform: uppercase;">Fluxo de
+        Escala (7 dias)</h4>
+      <div style="height: 250px;"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="glass-panel" style="margin-bottom: 0;">
+      <h4 style="font-size: 0.75rem; margin-bottom: 1.5rem; color: var(--accent); text-transform: uppercase;">
+        Geolocalização</h4>
+      <div style="height: 250px;"><canvas id="pieChart"></canvas></div>
+    </div>
+  </div>
+
+
+  <div class="section-grid animate-in" style="animation-delay: 0.25s;">
+    <div class="glass-panel live-radar">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+        <h4 style="font-size: 0.75rem; color: var(--accent); text-transform: uppercase;">Live Radar</h4>
+        <span id="live-updated" style="font-size: 0.65rem; color: var(--muted);">Atualizando...</span>
+      </div>
+      <div id="live-list" class="live-list">
+        <div class="live-item">
+          <div>
+            <div class="live-company">Aguardando leads reais...</div>
+            <div class="live-meta"><span>Conecte a base</span></div>
+          </div>
+          <div class="live-score">--</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="glass-panel" id="hunter-target-panel" style="border-left: 3px solid var(--accent-2);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.2rem;">
+          <h4 style="font-size: 0.75rem; color: var(--accent-2); text-transform: uppercase;">📡 Hunter: Alvos
+            Estratégicos</h4>
+          <span id="hunter-sync-badge"
+            style="font-size: 0.6rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 0.2rem 0.5rem; border-radius: 4px;">SYNC_ACTIVE</span>
+        </div>
+        <div style="display: grid; gap: 1.2rem;">
+
+          <!-- NICHOS: Tags selecionáveis -->
+          <div>
+            <label
+              style="display: block; font-size: 0.6rem; color: var(--muted); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;">Nichos
+              Padrão (clique para ativar/desativar)</label>
+            <div id="hunter-tags" style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;">
+              <!-- Renderizado via JS -->
+            </div>
+            <!-- Campo para adicionar nicho personalizado -->
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="hunter-custom-nicho" placeholder="+ Adicionar nicho personalizado..."
+                style="flex:1; padding: 0.5rem 0.7rem; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 8px; color: #fff; font-size: 0.72rem;"
+                onkeydown="if(event.key==='Enter') addCustomNicho()">
+              <button onclick="addCustomNicho()" class="btn-elite"
+                style="padding: 0.5rem 0.8rem; font-size: 0.65rem;">+</button>
+            </div>
+          </div>
+
+          <!-- CIDADES -->
+          <div>
+            <label
+              style="display: block; font-size: 0.6rem; color: var(--muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.1em;">Cidades</label>
+            <input type="text" id="hunter-cidades" placeholder="Ex: Guarulhos, São Paulo..."
+              style="width: 100%; padding: 0.7rem; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 8px; color: #fff; font-size: 0.75rem;">
+          </div>
+
+          <!-- Botões de ação -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+            <button onclick="updateHunterConfig()" class="btn-elite"
+              style="justify-content: center; border-color: var(--accent-2); color: var(--accent-2);">🎯
+              REDIRECIONAR</button>
+            <button onclick="resetHunterConfig()" class="btn-elite"
+              style="justify-content: center; border-color: rgba(255,255,255,0.15); color: var(--muted);">↩
+              PADRÃO</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="glass-panel">
+      <h4 style="font-size: 0.75rem; margin-bottom: 1rem; color: var(--accent); text-transform: uppercase;">Resumo de
+        Hoje</h4>
+      <div style="display:grid; gap: 1rem;">
+        <div>
+          <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;">Leads
+            Hoje</div>
+          <div style="font-size: 2rem; font-weight: 800;">{{ kpis.leads_hoje }}</div>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <div>
+            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;">
+              Entregues</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #10b981;">{{ kpis.leads_hoje_printed }}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;">Em
+              Espera</div>
+            <div style="font-size: 1.4rem; font-weight: 700; color: #f59e0b;">{{ kpis.leads_hoje_wait }}</div>
+          </div>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--muted);">
+          Foco total no LIVE. Cada entrada aqui ? lead real vindo do banco.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ðŸŽ›ï¸ Hunter Console & Controls -->
+  <div class="animate-in" style="animation-delay: 0.3s;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h4 style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase;">&gt; HUNTER_LOGS_PRO_V2.4</h4>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <select id="worker-type-focus"
+          style="background: rgba(0,0,0,0.5); color:#A7F3D0; border:1px solid rgba(0,255,65,0.35); border-radius:8px; padding: 5px 8px; font-size:0.62rem; font-weight:700; font-family: var(--font-mono);">
+          <option value="b2b" selected>B2B</option>
+          <option value="b2c">B2C</option>
+          <option value="misto">MISTO</option>
+        </select>
+        <button id="btnConsoleToggle" onclick="toggleConsole()" class="btn-elite"
+          style="font-size: 0.6rem; padding: 4px 10px; border-color: #00FF41; color: #00FF41;">&gt; START WORKER</button>
+      </div>
+    </div>
+    <div id="hunter-console">
+      [SYSTEM] Hunter Engine Standby...<br>
+      [IDLE] Clique em START para iniciar a mineração em tempo real.<br>
+    </div>
+  </div>
+
+  <div class="refresh-bar" style="background: var(--accent-2); opacity: 0.6;"></div>
+
+  <!-- ðŸ“‹ Leads Master Table -->
+  <div class="animate-in" style="animation-delay: 0.4s;">
+    <div id="tableWrap">
+      <table class="table-elite" id="leadsTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Empresa / Lead</th>
+            <th>Nicho</th>
+            <th>Cidade</th>
+            <th>Score</th>
+            <th>WhatsApp</th>
+            <th>Status</th>
+            <th>Ações Elite</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr id="row-{{ lead.id }}">
+            <td><span style="opacity: 0.3;">#</span>{{ lead.id }}</td>
+            <td>
+              <div style="font-weight: 800;">{{ lead.user_name }}</div>
+              <div style="font-size: 0.7rem; color: var(--accent-2);">{{ lead.company_name }}</div>
+            </td>
+            <td><span class="badge-premium" style="background: rgba(255,255,255,0.05);">{{ lead.nicho }}</span></td>
+            <td style="color: var(--muted);">{{ lead.city }}</td>
+            <td><span class="badge-premium" style="background: var(--accent); color: #000;">{{ lead.clienteiro_score
+                }}%</span></td>
+            <td>
+              {% if lead.wa_url %}
+              <a href="{{ lead.wa_url }}" target="_blank" class="btn-elite"
+                style="padding: 0.3rem 0.6rem; font-size: 0.6rem;">Abrir Chat</a>
+              {% endif %}
+            </td>
+            <td>
+              {% if lead.printed %}
+              <span class="badge-premium" style="background: #10b981; color: #fff;">ENTREGUE</span>
+              {% else %}
+              <span class="badge-premium" style="background: #f59e0b; color: #000;">NOVO</span>
+              {% endif %}
+            </td>
+            <td style="white-space: nowrap;">
+              {% if lead.pdf_path %}
+              <a href="/download/{{ lead.pdf_path }}" class="btn-elite btn-elite-primary" target="_blank"
+                style="padding: 0.4rem; font-size: 0.65rem;">PDF</a>
+              {% else %}
+              <a href="https://www.google.com/maps/search/?api=1&query={{ (lead.company_name ~ ' ' ~ lead.city) | urlencode }}"
+                target="_blank" class="btn-elite"
+                style="padding: 0.4rem; font-size: 0.65rem; color: #FF7A18; border-color: rgba(255,122,24,0.3);">Maps</a>
+              {% if lead.wa_url %}
+              <a href="{{ lead.wa_url }}"
+                target="_blank" class="btn-elite"
+                style="padding: 0.4rem; font-size: 0.65rem; color: #25D366; border-color: rgba(37,211,102,0.3);">Whats</a>
+              {% endif %}
+              {% endif %}
+              <button onclick="deleteLead({{ lead.id }})" class="btn-elite"
+                style="color: #ef4444; border-color: rgba(239,68,68,0.2); padding: 0.4rem;">DEL</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ðŸ—‚ï¸ Kanban Board Elite -->
+    <style>
+      .kanban-board {
+        display: none;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+
+      .kanban-col-elite {
+        background: rgba(255, 255, 255, 0.01);
+        border-radius: 20px;
+        padding: 1.5rem;
+        border: 1px solid var(--glass-border);
+        min-height: 500px;
+      }
+
+      .kanban-col-elite h3 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--accent-2);
+        margin-bottom: 1.5rem;
+        letter-spacing: 2px;
+      }
+
+      .kanban-card-elite {
+        background: var(--panel);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        cursor: grab;
+        transition: 0.3s;
+      }
+
+      .kanban-card-elite:hover {
+        border-color: var(--accent);
+        transform: translateY(-3px);
+      }
+    </style>
+    <div class="kanban-board" id="kanbanBoard">
+      <div class="kanban-col-elite" id="col-aguardando">
+        <h3>&gt; PENDING_MATCH</h3>
+      </div>
+      <div class="kanban-col-elite" id="col-impresso">
+        <h3>&gt; DELIVERED_SUCCESS</h3>
+      </div>
+    </div>
+
+    <!-- ðŸ“… Agenda Section -->
+    <div id="agendaSection" style="display: none;" class="animate-in">
+      <div class="glass-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h3 style="color: var(--accent); font-size: 0.8rem; text-transform: uppercase;">Calendário Estratégico</h3>
+          <span style="font-size: 0.7rem; color: var(--muted);">Arraste para reagendar e sincronizar com Google</span>
+        </div>
+        <div id="calendar" style="min-height: 600px; background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 12px;">
+        </div>
+      </div>
+    </div>
+
+    <!-- âš™ï¸ Configuration Section -->
+    {% if nivel_acesso == 'diretor' %}
+    <div id="configSection" style="display: none;" class="animate-in">
+      <div class="glass-panel" style="max-width: 600px;">
+        <h3 style="color: var(--accent); margin-bottom: 1.5rem; font-size: 0.8rem; text-transform: uppercase;">
+          Configurações do Ecossistema</h3>
+        <form id="configForm">
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 0.5rem;">ADMIN PHONES
+              (Separados por vírgula)</label>
+            <input type="text" name="admin_phones"
+              style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: #fff;">
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 0.5rem;">GOOGLE
+              CALENDAR ID</label>
+            <input type="text" name="google_calendar_id"
+              style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: #fff;">
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 0.5rem;">INTERNAL API
+              KEY (Bot Sync)</label>
+            <input type="text" name="internal_api_key"
+              style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: #fff;">
+          </div>
+          <button type="submit" class="btn-elite btn-elite-primary" style="width: 100%;">SALVAR CONFIGURACOES</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ðŸŽ¯ Strategy Modal -->
+  <div id="strategyModal"
+    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(10px); z-index:9999; justify-content:center; align-items:center;">
+    <div class="glass-panel" style="width: 90%; max-width: 500px; padding: 2.5rem;">
+      <h3 style="color: var(--accent); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px;">Abordagem
+        Estratégica</h3>
+      <div id="strategy-content"
+        style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem; color: #fff; font-style: italic;">Carregando
+        tática de venda...</div>
+      <div style="display: flex; gap: 1rem;">
+        <button id="copy-hook" class="btn-elite btn-elite-primary" style="flex: 2;">COPIAR GANCHO</button>
+        <button onclick="document.getElementById('strategyModal').style.display='none'" class="btn-elite"
+          style="flex: 1;">FECHAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script id="leads-chart-data" type="application/json">
+    {{ kpis.leads_grafico | tojson | safe }}
+  </script>
+  <script id="leads-city-labels" type="application/json">
+    {{ kpis.leads_por_cidade_labels | tojson | safe }}
+  </script>
+  <script id="leads-city-values" type="application/json">
+    {{ kpis.leads_por_cidade_values | tojson | safe }}
+  </script>
+
+  <script>
+    // ðŸ“ˆ Charts Logic Master
+    document.addEventListener("DOMContentLoaded", function () {
+      try {
+        const lineDataRaw = document.getElementById('leads-chart-data').textContent;
+        const lineData = JSON.parse(lineDataRaw) || { labels: [], values: [] };
+
+        new Chart(document.getElementById('lineChart'), {
+          type: 'line',
+          data: {
+            labels: lineData.labels || [],
+            datasets: [{
+              label: 'Leads',
+              data: lineData.values || [],
+              borderColor: '#FF7A18',
+              backgroundColor: 'rgba(255, 106, 0, 0.1)',
+              fill: true,
+              tension: 0.4,
+              borderWidth: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } },
+              x: { grid: { display: false }, ticks: { color: '#888' } }
+            }
+          }
+        });
+
+        const pieLabels = JSON.parse(document.getElementById('leads-city-labels').textContent) || [];
+        const pieValues = JSON.parse(document.getElementById('leads-city-values').textContent) || [];
+
+        new Chart(document.getElementById('pieChart'), {
+          type: 'doughnut',
+          data: {
+            labels: pieLabels,
+            datasets: [{ data: pieValues, backgroundColor: ['#FF7A18', '#00D1FF', '#FFB380', '#D97706', '#4B5563'], borderWidth: 0 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'bottom', labels: { color: '#888', font: { size: 10 }, usePointStyle: true } } } }
+        });
+      } catch (e) {
+        console.error("Data Parse/Chart Error:", e);
+      }
+    });
+
+    // ðŸ¤– Elite Bot Monitoring
+    async function updateBotStatus() {
+      const statusText = document.getElementById('status-text');
+      const dot = document.querySelector('.pulse-elite');
+      try {
+        const res = await fetch('/admin/api/bot_status');
+        const data = await res.json();
+        const status = data.status || 'OFFLINE';
+        const enabled = data.enabled !== false;
+        if (statusText) statusText.innerText = enabled ? status : 'DISABLED';
+        if (dot) {
+          if (!enabled) dot.style.background = '#9ca3af';
+          else dot.style.background = (status === 'CONNECTED') ? '#10b981' : 'var(--accent)';
+        }
+      } catch (e) {
+        if (statusText) statusText.innerText = 'OFFLINE';
+        if (dot) dot.style.background = '#ef4444';
+      }
+    }
+    setInterval(updateBotStatus, 15000);
+    updateBotStatus();
+
+    // ðŸ”´ Live Radar Feed
+    let liveSeen = new Set();
+    async function refreshLiveFeed() {
+      const list = document.getElementById('live-list');
+      const stamp = document.getElementById('live-updated');
+      try {
+        const res = await fetch('/api/live-feed?limit=8');
+        const data = await res.json();
+        if (!data.ok || !list) return;
+
+        const leads = data.leads || [];
+        const fragment = document.createDocumentFragment();
+
+        leads.forEach((lead, idx) => {
+          const item = document.createElement('div');
+          const isNew = !liveSeen.has(lead.id) && idx === 0;
+          liveSeen.add(lead.id);
+          item.className = isNew ? 'live-item new' : 'live-item';
+
+          const score = lead.clienteiro_score ?? '--';
+          const company = lead.company_name || 'Lead';
+          const city = lead.city || 'Cidade';
+          const nicho = lead.nicho || 'Nicho';
+
+          item.innerHTML = `
+            <div>
+              <div class="live-company">${company}</div>
+              <div class="live-meta">
+                <span class="live-chip live-chip-city">Cidade: ${city}</span>
+                <span class="live-chip live-chip-nicho">Nicho: ${nicho}</span>
+              </div>
+            </div>
+            <div class="live-score">${score}</div>
+          `;
+
+          fragment.appendChild(item);
+        });
+
+        list.innerHTML = '';
+        list.appendChild(fragment);
+
+        if (stamp) {
+          const now = new Date();
+          stamp.textContent = `Atualizado ${now.toLocaleTimeString()}`;
+        }
+      } catch (e) {
+        if (stamp) stamp.textContent = 'Offline';
+      }
+    }
+
+    refreshLiveFeed();
+    setInterval(refreshLiveFeed, 4000); // 🚀 Radar mais rápido para a feira
+
+    function filterFairLeads() {
+      const rows = document.querySelectorAll('#leadsTable tbody tr');
+      const btn = document.getElementById('btnFair');
+      const isFiltering = btn.classList.contains('active');
+
+      if (isFiltering) {
+        rows.forEach(r => r.style.display = '');
+        btn.classList.remove('active');
+      } else {
+        rows.forEach(r => {
+          const userName = r.querySelector('div[style="font-weight: 800;"]').innerText;
+          if (userName.includes('Motor Autônomo')) {
+            r.style.display = 'none';
+          } else {
+            r.style.display = '';
+          }
+        });
+        setView('table');
+        btn.classList.add('active');
+        alert('Mostrando apenas leads capturados pelo formulário!');
+      }
+    }
+
+    // ðŸŽ¯ Live Match Logic
+    async function getStrategy(id) {
+      const modal = document.getElementById('strategyModal');
+      const content = document.getElementById('strategy-content');
+      if (modal) modal.style.display = 'flex';
+      if (content) content.innerText = 'Consultando biblioteca estratégica...';
+
+      try {
+        const res = await fetch(`/admin/api/hook/${id}`, { method: 'POST' });
+        const data = await res.json();
+        if (content) content.innerText = `"${data.hook}"`;
+        const copyBtn = document.getElementById('copy-hook');
+        if (copyBtn) {
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(data.hook);
+            alert('Gancho copiado para o seu WhatsApp!');
+          };
+        }
+      } catch (e) {
+        if (content) content.innerText = 'Erro ao carregar estratégia.';
+      }
+    }
+
+    // --- 📡 Real-time Hunter Console (Polling) ---
+    let logPollInterval = null;
+    let currentCursor = 0;
+
+    async function toggleConsole() {
+      const btn = document.getElementById('btnConsoleToggle');
+      const hunterConsole = document.getElementById('hunter-console');
+
+      if (logPollInterval) {
+        // STOP
+        clearInterval(logPollInterval);
+        logPollInterval = null;
+        btn.innerText = "> START WORKER";
+        btn.style.borderColor = "#00FF41";
+        btn.style.color = "#00FF41";
+        hunterConsole.innerHTML += `<div style="color: #ef4444; margin-bottom:4px;">> [STOP] Desconectando motor...</div>`;
+        hunterConsole.scrollTop = hunterConsole.scrollHeight;
+
+        try {
+          await fetch('/admin/stop_worker', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token() }}' }
+          });
+        } catch (e) { }
+      } else {
+        // START
+        btn.innerText = "⏹ STOP WORKER";
+        btn.style.borderColor = "#ef4444";
+        btn.style.color = "#ef4444";
+        hunterConsole.innerHTML += `<div style="color: #10b981; margin-bottom:4px;">> [START] Acionando motor de colheita...</div>`;
+        hunterConsole.scrollTop = hunterConsole.scrollHeight;
+
+        currentCursor = 0;
+        const typeFocusSelect = document.getElementById('worker-type-focus');
+        const selectedTypeFocus = (typeFocusSelect?.value || 'b2b').toLowerCase();
+
+        try {
+          const res = await fetch('/admin/start_worker', {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token() }}',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ type_focus: selectedTypeFocus })
+          });
+          const data = await res.json();
+          if (!data.ok && data.error !== 'Worker já está rodando') {
+            throw new Error(data.error);
+          }
+        } catch (err) {
+          hunterConsole.innerHTML += `<div style="color: #ef4444; margin-bottom:4px;">> Erro: ${err.message}</div>`;
+          hunterConsole.scrollTop = hunterConsole.scrollHeight;
+          // Reverte estado visual
+          btn.innerText = "> START WORKER";
+          btn.style.borderColor = "#00FF41";
+          btn.style.color = "#00FF41";
+          logPollInterval = null;
+          return;
+        }
+
+        logPollInterval = setInterval(async () => {
+          try {
+            const res = await fetch('/admin/poll_logs?cursor=' + currentCursor);
+            const data = await res.json();
+
+            if (data.logs && data.logs.length > 0) {
+              const frag = document.createDocumentFragment();
+              data.logs.forEach(msg => {
+                const line = document.createElement('div');
+                line.style.marginBottom = "4px";
+                line.innerHTML = `<span style="color: #444;">[${new Date().toLocaleTimeString()}]</span> <span style="color: #00FF41;">></span> <span style="color: rgba(255,255,255,0.7);">${msg}</span>`;
+                frag.appendChild(line);
+              });
+              hunterConsole.appendChild(frag);
+
+              while (hunterConsole.childNodes.length > 100) {
+                hunterConsole.removeChild(hunterConsole.firstChild);
+              }
+
+              hunterConsole.scrollTop = hunterConsole.scrollHeight;
+            }
+            if (data.cursor !== undefined) {
+              currentCursor = data.cursor;
+            }
+
+            if (data.is_running === false && logPollInterval) {
+              clearInterval(logPollInterval);
+              logPollInterval = null;
+              btn.innerText = "> START WORKER";
+              btn.style.borderColor = "#00FF41";
+              btn.style.color = "#00FF41";
+              hunterConsole.innerHTML += `<div style="color: #ef4444; margin-bottom:4px;">> [STOP] Motor finalizado automaticamente.</div>`;
+              hunterConsole.scrollTop = hunterConsole.scrollHeight;
+            }
+          } catch (e) {
+            console.error("Erro poll logs", e);
+          }
+        }, 800);
+      }
+    }
+
+    // View Switching
+    function setView(mode) {
+      const table = document.getElementById('tableWrap');
+      const kanban = document.getElementById('kanbanBoard');
+      const agenda = document.getElementById('agendaSection');
+      const config = document.getElementById('configSection');
+
+      const btnT = document.getElementById('btnTable');
+      const btnK = document.getElementById('btnKanban');
+      const btnA = document.getElementById('btnAgenda');
+      const btnC = document.getElementById('btnConfig');
+
+      // Reset
+      [table, kanban, agenda, config].forEach(el => { if (el) el.style.display = 'none'; });
+      [btnT, btnK, btnA, btnC].forEach(btn => { if (btn) { btn.classList.remove('active'); } });
+
+      if (mode === 'kanban') {
+        if (kanban) kanban.style.display = 'grid';
+        if (btnK) { btnK.classList.add('active'); }
+        renderKanban();
+      } else if (mode === 'agenda') {
+        if (agenda) agenda.style.display = 'block';
+        if (btnA) { btnA.classList.add('active'); }
+        loadAgenda();
+      } else if (mode === 'config') {
+        if (config) config.style.display = 'block';
+        if (btnC) { btnC.classList.add('active'); }
+        loadConfig();
+      } else {
+        if (table) table.style.display = 'block';
+        if (btnT) { btnT.classList.add('active'); }
+      }
+    }
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/admin/api/config');
+        const data = await res.json();
+        if (data.ok) {
+          const form = document.getElementById('configForm');
+          if (!form) return;
+          for (let key in data.configs) {
+            const input = form.querySelector(`[name="${key}"]`);
+            if (input) input.value = data.configs[key];
+          }
+        }
+      } catch (e) { console.error('Error loading config', e); }
+    }
+
+    const configForm = document.getElementById('configForm');
+    if (configForm) {
+      configForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const data = {};
+        fd.forEach((v, k) => data[k] = v);
+        try {
+          const res = await fetch('/admin/api/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          const resData = await res.json();
+          if (resData.ok) alert('Configuracoes salvas!');
+          else alert('Erro: ' + resData.error);
+        } catch (e) { alert('Erro de rede.'); }
+      };
+    }
+
+    let calendar = null;
+
+    async function loadAgenda() {
+      const calendarEl = document.getElementById('calendar');
+      if (!calendar) {
+        calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'timeGridWeek',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          },
+          editable: true,
+          droppable: true,
+          nowIndicator: true,
+          locale: 'pt-br',
+          slotMinTime: '08:00:00',
+          slotMaxTime: '20:00:00',
+          themeSystem: 'standard',
+          eventColor: '#FF7A18',
+          eventTextColor: '#000',
+          eventClick: function (info) {
+            alert('Lead: ' + info.event.title + '\nEmpresa: ' + info.event.extendedProps.company);
+          },
+          eventDrop: async function (info) {
+            if (!confirm(`Confirmar reagendamento para ${info.event.start.toLocaleString()}?`)) {
+              info.revert();
+              return;
+            }
+            const eventId = info.event.id;
+            const newStart = info.event.start.toISOString();
+
+            try {
+              const res = await fetch('/admin/api/update_appointment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: eventId, new_start: newStart })
+              });
+              const data = await res.json();
+              if (data.ok) {
+                alert('Google Agenda sincronizada com sucesso!');
+              } else {
+                alert('Erro ao sincronizar: ' + data.error);
+                info.revert();
+              }
+            } catch (e) {
+              alert('Erro de rede.');
+              info.revert();
+            }
+          }
+        });
+        calendar.render();
+      }
+
+      try {
+        const res = await fetch('/admin/api/agenda');
+        const data = await res.json();
+        if (data.ok) {
+          calendar.removeAllEvents();
+          data.appointments.forEach(ap => {
+            calendar.addEvent({
+              id: ap.id,
+              title: ap.lead_name || ap.phone,
+              start: ap.appointment_date,
+              extendedProps: {
+                company: ap.company_name,
+                phone: ap.phone
+              }
+            });
+          });
+        }
+      } catch (e) { console.error('Error loading agenda', e); }
+    }
+
+    function renderKanban() {
+      const colAg = document.getElementById('col-aguardando');
+      const colImp = document.getElementById('col-impresso');
+      if (colAg) colAg.innerHTML = '<h3>> PENDING_MATCH</h3>';
+      if (colImp) colImp.innerHTML = '<h3>> DELIVERED_SUCCESS</h3>';
+
+      // Habilita drop nas colunas
+      [colAg, colImp].forEach(col => {
+        if (!col) return;
+        col.ondragover = (e) => { e.preventDefault(); col.style.background = 'rgba(255,106,0,0.06)'; };
+        col.ondragleave = () => { col.style.background = ''; };
+        col.ondrop = async (e) => {
+          e.preventDefault();
+          col.style.background = '';
+          const leadId = e.dataTransfer.getData('text/plain');
+          if (!leadId) return;
+          const card = document.getElementById('kanban-card-' + leadId);
+          if (card) col.appendChild(card);
+          // Se soltou em DELIVERED, marca como entregue
+          if (col === colImp) {
+            try {
+              await fetch('/admin/mark_printed/' + leadId, { method: 'POST' });
+              card.style.borderColor = '#10b981';
+            } catch (err) { }
+          }
+        };
+      });
+
+      document.querySelectorAll('#leadsTable tbody tr').forEach(row => {
+        const id = row.cells[0].innerText.replace('#', '').trim();
+        const name = row.cells[1].innerHTML;
+        const status = row.cells[6].innerText.trim();
+        const actions = row.cells[7].innerHTML;
+
+        const card = document.createElement('div');
+        card.className = 'kanban-card-elite';
+        card.id = 'kanban-card-' + id;
+        card.draggable = true;
+        card.ondragstart = (e) => { e.dataTransfer.setData('text/plain', id); card.style.opacity = '0.5'; };
+        card.ondragend = () => { card.style.opacity = '1'; };
+        card.innerHTML = `<div style="margin-bottom:1rem">${name}</div><div style="display:flex; gap:0.5rem">${actions}</div>`;
+
+        if (status === 'ENTREGUE' && colImp) colImp.appendChild(card);
+        else if (colAg) colAg.appendChild(card);
+      });
+    }
+
+    // ——— HUNTER COMMAND CENTER ——————————————————————————————
+    const NICHOS_DEFAULT = [
+      'Dentista', 'Advogado', 'Academia de Ginástica', 'Restaurante', 'Pizzaria',
+      'Pet Shop', 'Oficina Mecânica', 'Imobiliária', 'Clínica Estética', 'Padaria',
+      'Escola de Inglês', 'Cursinho Pré-Vestibular', 'Salão de Beleza', 'Farmácia'
+    ];
+    let _activeNichos = new Set();
+    let _customNichos = [];
+
+    function renderNichoTags(activeList) {
+      _activeNichos = new Set(activeList.map(n => n.trim()));
+      const container = document.getElementById('hunter-tags');
+      if (!container) return;
+      container.innerHTML = '';
+      NICHOS_DEFAULT.forEach(n => {
+        const tag = document.createElement('span');
+        tag.textContent = n;
+        tag.className = 'niche-tag' + (_activeNichos.has(n) ? ' active' : '');
+        tag.onclick = () => { _activeNichos.has(n) ? _activeNichos.delete(n) : _activeNichos.add(n); tag.classList.toggle('active'); };
+        container.appendChild(tag);
+      });
+      _customNichos.forEach(n => {
+        if (NICHOS_DEFAULT.includes(n)) return;
+        const tag = document.createElement('span');
+        tag.textContent = n + ' ✕';
+        tag.className = 'niche-tag custom' + (_activeNichos.has(n) ? ' active' : '');
+        tag.onclick = () => { _customNichos = _customNichos.filter(x => x !== n); _activeNichos.delete(n); renderNichoTags([..._activeNichos]); };
+        container.appendChild(tag);
+      });
+    }
+
+    function addCustomNicho() {
+      const input = document.getElementById('hunter-custom-nicho');
+      const val = input.value.trim();
+      if (!val) return;
+      if (!_customNichos.includes(val)) _customNichos.push(val);
+      _activeNichos.add(val);
+      input.value = '';
+      renderNichoTags([..._activeNichos]);
+    }
+
+    async function loadHunterUI() {
+      try {
+        const res = await fetch('/admin/api/hunter_config');
+        const data = await res.json();
+        const nichos = (data.ok && data.config) ? data.config.nichos : NICHOS_DEFAULT;
+        const cidades = (data.ok && data.config) ? data.config.cidades.join(', ') : 'Sao Paulo, Guarulhos, Campinas';
+        _customNichos = nichos.filter(n => !NICHOS_DEFAULT.includes(n));
+        renderNichoTags(nichos);
+        document.getElementById('hunter-cidades').value = cidades;
+      } catch (e) { renderNichoTags(NICHOS_DEFAULT); console.error('Hunter Load Error', e); }
+    }
+
+    async function updateHunterConfig() {
+      const nichos = [..._activeNichos].join(', ');
+      const cidades = document.getElementById('hunter-cidades').value;
+      if (!nichos) { alert('Selecione ao menos um nicho!'); return; }
+      try {
+        const res = await fetch('/admin/api/hunter_config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+          body: JSON.stringify({ nichos, cidades })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          const badge = document.getElementById('hunter-sync-badge');
+          if (badge) { badge.textContent = 'ATUALIZADO ✓'; badge.style.color = '#FF7A18'; setTimeout(() => { badge.textContent = 'SYNC_ACTIVE'; badge.style.color = '#10b981'; }, 2500); }
+        } else { alert('Erro: ' + data.error); }
+      } catch (e) { alert('Erro de rede ao atualizar Hunter.'); }
+    }
+
+    async function resetHunterConfig() {
+      _customNichos = [];
+      renderNichoTags([...NICHOS_DEFAULT]);
+      document.getElementById('hunter-cidades').value = 'Sao Paulo, Guarulhos, Campinas, Sao Bernardo do Campo, Santos';
+      await updateHunterConfig();
+    }
+
+    loadHunterUI();
+    // ————————————————————————————————————————————————————————
+
+
+    async function deleteLead(id) {
+      if (!confirm('Eliminar lead do radar permanentemente?')) return;
+      try {
+        const res = await fetch(`/admin/delete_lead/${id}`, { method: 'POST' });
+        if (res.ok) location.reload();
+      } catch (e) { alert('Erro ao eliminar lead.'); }
+    }
+
+
+  </script>
+</body>
+
+</html>

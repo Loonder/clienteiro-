@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Log | Clienteiro Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#FF6A00; --bg:#0F0F0F; --card:rgba(25,25,25,.95); --border:rgba(255,106,0,.18); --text:#FFFFFF; --muted:rgba(255,255,255,.5); }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem;flex-wrap:wrap;gap:.75rem}
+    .title{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;color:var(--primary);letter-spacing:2px;text-transform:uppercase}
+    .btn{padding:.45rem .9rem;border-radius:7px;border:none;cursor:pointer;font-weight:700;font-size:.75rem;letter-spacing:.04em;text-decoration:none;display:inline-block;transition:opacity .2s}
+    .btn:hover{opacity:.8}
+    .btn-back{background:rgba(255,106,0,.15);color:var(--primary);border:1px solid var(--border)}
+    .table-wrap{background:var(--card);border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+    table{width:100%;border-collapse:collapse;text-align:left}
+    th{background:rgba(212,175,55,.08);padding:.8rem 1rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--primary)}
+    td{padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem;color:var(--muted)}
+    td:first-child{color:var(--text)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .badge{display:inline-block;padding:.2rem .55rem;border-radius:5px;font-size:.65rem;font-weight:700}
+    .b-print{background:#10b981;color:#fff}
+    .b-export{background:#3b82f6;color:#fff}
+    .b-login{background:rgba(212,175,55,.2);color:var(--primary)}
+    .b-other{background:rgba(255,255,255,.08);color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">Audit Log — Acesso Diretor</h1>
+    <a href="/admin" class="btn btn-back">← Voltar ao Admin</a>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Gestor</th>
+          <th>Ação</th>
+          <th>Lead ID</th>
+          <th>IP</th>
+          <th>Data/Hora</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>#{{ log.id }}</td>
+          <td>{{ log.nome_usuario or '—' }}</td>
+          <td>
+            {% if log.acao == 'mark_printed' %}
+              <span class="badge b-print">IMPRESSO</span>
+            {% elif log.acao == 'export_csv' %}
+              <span class="badge b-export">EXPORT CSV</span>
+            {% elif log.acao == 'login' %}
+              <span class="badge b-login">LOGIN</span>
+            {% else %}
+              <span class="badge b-other">{{ log.acao }}</span>
+            {% endif %}
+          </td>
+          <td>{% if log.lead_id %}#{{ log.lead_id }}{% else %}—{% endif %}</td>
+          <td style="font-family:monospace;font-size:.75rem">{{ log.ip }}</td>
+          <td style="font-size:.75rem">{{ log.timestamp }}</td>
+        </tr>
+        {% endfor %}
+        {% if not logs %}
+        <tr><td colspan="6" style="text-align:center;padding:2rem;opacity:.4">Nenhuma ação registrada ainda.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

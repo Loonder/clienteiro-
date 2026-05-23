@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta de Prêmios Premium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>Gire e Ganhe</h1>
+            <p>Tente a sorte e conquiste um prêmio exclusivo!</p>
+        </header>
+
+        <div class="roulette-wrapper">
+            <!-- Lead Gate Overlay -->
+            <div id="leadGate" class="lead-gate">
+                <div class="lead-form">
+                    <h3>Libere seu Giro Grátis</h3>
+                    <p>Preencha seus dados para concorrer aos prêmios</p>
+                    <input type="text" id="leadName" placeholder="Seu Nome Completo" required>
+                    <input type="tel" id="leadPhone" placeholder="Seu WhatsApp (com DDD)" required>
+                    <button id="unlockBtn" class="btn-primary">Liberar Roleta</button>
+                    <p class="terms">Ao clicar, você concorda em receber nosso contato.</p>
+                </div>
+            </div>
+
+            <div class="pointer">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21l-12-18h24z"/>
+                </svg>
+            </div>
+            
+            <div class="wheel-outer">
+                <div id="wheel" class="wheel-inner">
+                    <!-- Segments will be injected by JS -->
+                </div>
+            </div>
+
+            <button id="spinBtn" class="spin-btn">Girar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Resultado -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="prize-icon">🏆</span>
+            <h2 id="modalTitle" class="prize-title">Parabéns!</h2>
+            <p id="modalDesc" class="prize-desc">Você acabou de ganhar um prêmio incrível.</p>
+            <button id="closeModal" class="btn-primary">Resgatar Agora</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

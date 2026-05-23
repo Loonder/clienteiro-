@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acessar Painel | Clienteiro PRO</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/favicon.png">
+  <meta property="og:title" content="Clienteiro PRO — Acesso ao Painel">
+  <meta property="og:image" content="https://clienteiro.com.br/static/og-image.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --primary: #FF6A00;
+      --bg: #000;
+      --card: rgba(10, 10, 10, 0.95);
+      --border: rgba(255, 106, 0, 0.15);
+      --text: #F0F2F5;
+      --muted: rgba(240,242,245,0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .login-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* --- Left Side: Visual/Image --- */
+    .visual-side {
+      flex: 1.2;
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.8)), url('/static/login-visual.png');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 5rem;
+      border-left: 1px solid var(--border);
+    }
+
+    .visual-side .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 2.5rem;
+      color: #fff;
+      margin-bottom: 2rem;
+    }
+    .visual-side .brand i { color: var(--primary); }
+    .visual-side blockquote {
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 500px;
+      line-height: 1.4;
+      border-left: 4px solid var(--primary);
+      padding-left: 2rem;
+    }
+
+    /* --- Right Side: Form --- */
+    .form-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 10%;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .form-header { margin-bottom: 3rem; }
+    .form-header h2 { font-family: 'Outfit', sans-serif; font-size: clamp(1.6rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: 0.5rem; }
+    .form-header p { color: var(--muted); font-size: 0.9rem; }
+
+    .social-auth {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .social-btn {
+      padding: 0.8rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+    .social-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 2.5rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+    .divider:not(:empty)::before { margin-right: 1.5rem; }
+    .divider:not(:empty)::after { margin-left: 1.5rem; }
+
+    .input-group { margin-bottom: 1.5rem; }
+    .input-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .input-group input {
+      width: 100%;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+    .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,106,0,0.1); }
+    .password-wrap { position: relative; }
+    .password-wrap input { padding-right: 3rem; }
+    .toggle-password {
+      position: absolute;
+      right: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .toggle-password:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(255,106,0,0.08);
+    }
+    .caps-warning {
+      margin-top: 0.45rem;
+      font-size: 0.72rem;
+      color: #f59e0b;
+      display: none;
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: all 0.3s;
+    }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,106,0,0.3); }
+
+    .nav-footer { margin-top: 3rem; text-align: center; }
+    .nav-footer a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .nav-footer a:hover { color: var(--primary); }
+
+    @media (max-width: 1000px) {
+      .visual-side { display: none; }
+      .form-side { padding: 3rem 2.5rem; }
+    }
+    @media (max-width: 600px) {
+      .form-side { padding: 2rem 1.25rem; }
+      .form-header { margin-bottom: 2rem; }
+      .social-auth { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+      .social-btn { font-size: 0.75rem; padding: 0.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="form-side">
+      <div class="form-header">
+        <h2>Painel do Usuário</h2>
+        <p>Acesse seus PDFs, relatórios e ferramentas de gestão da sua empresa.</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.85rem; border: 1px solid {{ 'rgba(16,185,129,0.2)' if category == 'success' else 'rgba(239, 68, 68, 0.2)' }}; background: {{ 'rgba(16,185,129,0.1)' if category == 'success' else 'rgba(239, 68, 68, 0.1)' }}; color: {{ '#10B981' if category == 'success' else '#EF4444' }};">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% if erro %}
+        <div style="padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.85rem; border: 1px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.1); color: #EF4444;">
+          {{ erro }}
+        </div>
+      {% endif %}
+
+      <div class="social-auth">
+        <a class="social-btn" href="/auth/google" aria-label="Entrar com Google">
+          <i data-lucide="mail" size="16"></i> Google
+        </a>
+        <a class="social-btn" href="/auth/facebook" aria-label="Entrar com Facebook">
+          <i data-lucide="facebook" size="16"></i> Facebook
+        </a>
+      </div>
+
+      <div class="divider">ou entre com usuário</div>
+
+      <form action="/login" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="input-group">
+          <label>Usuário</label>
+          <input type="text" name="usuario" placeholder="seu_usuario" required autofocus>
+        </div>
+
+        <div class="input-group">
+          <label>Senha</label>
+          <div class="password-wrap">
+            <input id="senha-input" type="password" name="senha" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="toggle-password" id="toggle-password" aria-label="Mostrar senha">
+              <i data-lucide="eye" size="16"></i>
+            </button>
+          </div>
+          <div class="caps-warning" id="caps-warning">Caps Lock ligado.</div>
+        </div>
+
+        <button type="submit" class="btn-login">ENTRAR NO PAINEL</button>
+      </form>
+
+      <div class="nav-footer">
+        <p style="margin-bottom: 1rem;">Ainda não tem conta? <a href="/register" style="color: var(--primary); font-weight: 700; text-decoration: none;">Cadastre-se Gratuitamente</a></p>
+        <a href="/">← Voltar ao Início</a>
+        <br><br>
+        <p style="color: var(--muted); font-size: 0.7rem;">Dashboard Restrito. Projeto Universitário 2026.</p>
+      </div>
+    </div>
+
+    <div class="visual-side">
+      <div class="brand">
+        <i data-lucide="zap" fill="currentColor"></i>
+        CLIENTEIRO
+      </div>
+      <blockquote>
+        "O futuro do marketing digital não é baseado em volume, mas em precisão e inteligência de dados."
+      </blockquote>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    const senhaInput = document.getElementById('senha-input');
+    const togglePassword = document.getElementById('toggle-password');
+    const capsWarning = document.getElementById('caps-warning');
+
+    if (senhaInput && togglePassword) {
+      togglePassword.addEventListener('click', () => {
+        const showing = senhaInput.type === 'text';
+        senhaInput.type = showing ? 'password' : 'text';
+        togglePassword.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
+        togglePassword.innerHTML = showing
+          ? '<i data-lucide="eye" size="16"></i>'
+          : '<i data-lucide="eye-off" size="16"></i>';
+        lucide.createIcons();
+        senhaInput.focus();
+      });
+
+      senhaInput.addEventListener('keyup', (e) => {
+        if (!capsWarning) return;
+        capsWarning.style.display = e.getModifierState('CapsLock') ? 'block' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

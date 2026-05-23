@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Clienteiro PRO | Resgate Seu Premio</title>
+  <style>
+    :root {
+      --bg: #070707;
+      --panel: #101010;
+      --line: rgba(255, 122, 26, 0.35);
+      --accent: #ff7a1a;
+      --accent-2: #00e6a8;
+      --text: #f3f3f3;
+      --muted: #acacac;
+      --danger: #ff7f7f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 600px at 20% -20%, rgba(255, 122, 26, 0.2), transparent 60%),
+        radial-gradient(900px 500px at 100% 120%, rgba(0, 230, 168, 0.14), transparent 60%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 44px),
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 44px),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .shell {
+      width: min(1100px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255, 122, 26, 0.08), rgba(0, 0, 0, 0.2));
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+    .head {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 122, 26, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand {
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-size: 1.2rem;
+    }
+    .brand span { color: var(--accent); }
+    .pill {
+      border: 1px solid rgba(0, 230, 168, 0.5);
+      color: var(--accent-2);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 22px;
+    }
+    .card {
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    h1, h2, p { margin: 0; }
+    .title {
+      font-size: clamp(1.6rem, 2.5vw, 2.3rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .title span { color: var(--accent); }
+    .desc {
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+    .form {
+      display: grid;
+      gap: 10px;
+    }
+    label {
+      font-size: 0.84rem;
+      color: #d8d8d8;
+      margin-bottom: 4px;
+      display: block;
+    }
+    input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      color: #fff;
+      padding: 12px 13px;
+      font-size: 0.98rem;
+      outline: none;
+    }
+    input:focus {
+      border-color: rgba(255, 122, 26, 0.8);
+      box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.2);
+    }
+    .btn {
+      width: 100%;
+      border: 1px solid rgba(255, 122, 26, 0.55);
+      background: linear-gradient(180deg, rgba(255, 122, 26, 0.22), rgba(255, 122, 26, 0.09));
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .btn[disabled] {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .status {
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+    .status.error { color: var(--danger); }
+    .status.ok { color: var(--accent-2); }
+    .wheel-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 100%;
+    }
+    .pointer {
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 22px solid var(--accent);
+      filter: drop-shadow(0 3px 8px rgba(255, 122, 26, 0.5));
+    }
+    #wheel {
+      width: min(360px, 74vw);
+      height: min(360px, 74vw);
+      max-width: 360px;
+      max-height: 360px;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 122, 26, 0.8);
+      box-shadow: 0 0 0 8px rgba(255, 122, 26, 0.15), 0 18px 36px rgba(0, 0, 0, 0.5);
+      transition: transform 4.8s cubic-bezier(0.11, 0.81, 0.18, 1);
+      transform: rotate(0deg);
+    }
+    .result {
+      width: 100%;
+      border: 1px dashed rgba(255, 122, 26, 0.45);
+      background: rgba(255, 122, 26, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      min-height: 88px;
+    }
+    .result strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+    .result small {
+      color: #cdcdcd;
+      line-height: 1.4;
+    }
+    .kiosk-exit-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(6px);
+      padding: 1rem;
+    }
+    .kiosk-exit-card {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 106, 0, 0.35);
+      background: #111;
+      padding: 1.5rem;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+    }
+    .kiosk-pin-input {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      font-size: 1rem;
+      padding: 0.85rem 0.9rem;
+      margin: 0.7rem 0;
+      outline: none;
+    }
+    .kiosk-exit-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
+    .mini {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: #171717;
+      color: #fff;
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+    .kiosk-exit-error {
+      min-height: 18px;
+      font-size: 0.84rem;
+      color: var(--danger);
+    }
+    @media (max-width: 880px) {
+      .grid { grid-template-columns: 1fr; }
+      .shell { border-radius: 16px; }
+      .head { padding: 14px; }
+      .grid { padding: 14px; gap: 14px; }
+      .title { font-size: 1.55rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="head">
+      <div class="brand">Clienteiro <span>PRO</span></div>
+      <div class="pill">Resgate de Premio</div>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h1 class="title">Resgate Seu <span>Premio</span></h1>
+        <p class="desc">
+          Preencha seus dados, valide seu WhatsApp e gire a roleta. Assim que cadastrar, voce recebe boas-vindas no WhatsApp.
+          Ao ganhar, enviamos os parabens e seu premio automaticamente.
+        </p>
+        <form class="form" id="leadForm" novalidate>
+          <div>
+            <label for="name">Seu nome</label>
+            <input id="name" name="name" maxlength="80" placeholder="Ex: Joao Silva" required>
+          </div>
+          <div>
+            <label for="phone">WhatsApp com DDD</label>
+            <input id="phone" name="phone" maxlength="20" placeholder="5511999999999" required>
+          </div>
+          <button class="btn" id="registerBtn" type="submit">Cadastrar e liberar roleta</button>
+        </form>
+        <div class="status" id="registerStatus"></div>
+      </article>
+
+      <article class="card">
+        <div class="wheel-wrap">
+          <div class="pointer"></div>
+          <canvas id="wheel" width="360" height="360" aria-label="Roleta de premios"></canvas>
+          <button class="btn" id="spinBtn" disabled>Girar roleta</button>
+          <div class="result" id="resultCard">
+            <strong>Aguardando cadastro para iniciar.</strong>
+            <small>Cada numero pode resgatar apenas 1 premio.</small>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div class="kiosk-exit-modal" id="kioskExitModal" aria-hidden="true">
+    <div class="kiosk-exit-card">
+      <h3 style="margin:0 0 6px 0;">Saida do modo kiosk</h3>
+      <p style="color:#bfbfbf;margin:0;">Digite o PIN de administrador para sair.</p>
+      <input class="kiosk-pin-input" id="kioskPinInput" type="password" autocomplete="off" inputmode="numeric" placeholder="PIN de saida">
+      <div class="kiosk-exit-error" id="kioskExitError"></div>
+      <div class="kiosk-exit-actions">
+        <button class="mini" id="kioskExitCancelBtn" type="button">Cancelar</button>
+        <button class="mini" id="kioskExitSubmitBtn" type="button">Liberar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+      const leadForm = document.getElementById('leadForm');
+      const registerBtn = document.getElementById('registerBtn');
+      const registerStatus = document.getElementById('registerStatus');
+      const spinBtn = document.getElementById('spinBtn');
+      const resultCard = document.getElementById('resultCard');
+      const wheel = document.getElementById('wheel');
+      const ctx = wheel.getContext('2d');
+
+      const prizes = [
+        { text: 'Relatorio de Inteligencia', icon: '📊', desc: 'Relatorio executivo de prospeccao real do CheckLeads.' },
+        { text: 'Consultoria Strategy', icon: '💎', desc: '30 minutos para ajustar sua estrategia comercial.' },
+        { text: 'Scripts High-Ticket', icon: '🔥', desc: 'Scripts premium para abordagem e fechamento.' },
+        { text: 'Diagnostico de Funil', icon: '⚙️', desc: 'Mapeamento de gargalos no funil de vendas.' },
+        { text: 'Checklist Escala Pura', icon: '🚀', desc: 'Checklist pratico para escalar com consistencia.' }
+      ];
+
+      let lead = null;
+      let spinning = false;
+      let currentRotation = 0;
+
+      function drawWheel() {
+        const center = wheel.width / 2;
+        const radius = center - 10;
+        const arc = (Math.PI * 2) / prizes.length;
+        ctx.clearRect(0, 0, wheel.width, wheel.height);
+        ctx.save();
+        ctx.translate(center, center);
+        for (let i = 0; i < prizes.length; i++) {
+          const start = i * arc - Math.PI / 2;
+          const end = start + arc;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.arc(0, 0, radius, start, end);
+          ctx.closePath();
+          ctx.fillStyle = i % 2 === 0 ? '#1a1a1a' : '#252525';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,122,26,0.55)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.save();
+          ctx.rotate(start + arc / 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 14px Segoe UI';
+          ctx.textAlign = 'right';
+          ctx.fillText(prizes[i].icon + ' ' + (i + 1), radius - 18, 4);
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+
+      function setStatus(el, message, mode) {
+        el.textContent = message || '';
+        el.className = 'status' + (mode ? ' ' + mode : '');
+      }
+
+      function normalizePhone(input) {
+        const digits = String(input || '').replace(/\D/g, '');
+        if (digits.startsWith('55')) return digits;
+        if (digits.length === 10 || digits.length === 11) return '55' + digits;
+        return digits;
+      }
+
+      function apiPost(url, body) {
+        return fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify(body || {})
+        }).then(async (res) => {
+          const data = await res.json().catch(() => ({}));
+          return { ok: res.ok, status: res.status, data };
+        });
+      }
+
+      leadForm.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        if (spinning) return;
+        const name = document.getElementById('name').value.trim();
+        const phone = normalizePhone(document.getElementById('phone').value);
+        if (!name || !phone) {
+          setStatus(registerStatus, 'Informe nome e WhatsApp.', 'error');
+          return;
+        }
+
+        registerBtn.disabled = true;
+        setStatus(registerStatus, 'Validando WhatsApp e registrando...', '');
+        const res = await apiPost('/api/kiosk/roulette/register', { name, phone });
+        registerBtn.disabled = false;
+
+        if (!res.ok) {
+          const msg = res.data?.error || 'Nao foi possivel registrar.';
+          setStatus(registerStatus, msg, 'error');
+          if (res.data?.already_claimed) {
+            spinBtn.disabled = true;
+            resultCard.innerHTML = '<strong>Este numero ja resgatou um premio.</strong><small>Use outro WhatsApp para nova participacao.</small>';
+          }
+          return;
+        }
+
+        lead = { name: res.data.name || name, phone: res.data.phone || phone };
+        spinBtn.disabled = false;
+        setStatus(registerStatus, 'Cadastro confirmado. Boa sorte no giro!', 'ok');
+        resultCard.innerHTML = '<strong>Cadastro concluido.</strong><small>Clique em "Girar roleta" para revelar seu premio.</small>';
+      });
+
+      spinBtn.addEventListener('click', async () => {
+        if (!lead || spinning) return;
+        spinning = true;
+        spinBtn.disabled = true;
+        resultCard.innerHTML = '<strong>Girando...</strong><small>Estamos processando seu premio.</small>';
+
+        const res = await apiPost('/api/kiosk/roulette/spin', lead);
+        if (!res.ok) {
+          spinning = false;
+          const msg = res.data?.error || 'Falha ao girar a roleta.';
+          resultCard.innerHTML = '<strong>Ops, nao foi dessa vez.</strong><small>' + msg + '</small>';
+          return;
+        }
+
+        const prize = res.data.prize || {};
+        const idx = Math.max(0, prizes.findIndex(p => p.text === prize.text));
+        const arc = 360 / prizes.length;
+        const targetCenter = idx * arc + arc / 2;
+        const targetAtTop = 360 - targetCenter;
+        currentRotation += (360 * 6) + targetAtTop;
+        wheel.style.transform = 'rotate(' + currentRotation + 'deg)';
+
+        setTimeout(() => {
+          spinning = false;
+          resultCard.innerHTML =
+            '<strong>' + (prize.icon || '🎁') + ' ' + (prize.text || 'Premio Especial') + '</strong>' +
+            '<small>' + (prize.desc || 'Parabens! Confira seu WhatsApp para receber os detalhes.') + '</small>';
+        }, 4900);
+      });
+
+      drawWheel();
+
+      // Protecao de saida do modo kiosk (combo secreto)
+      const comboTarget = String('{{ kiosk_secret_combo|default("CTRL+SHIFT+U") }}').toUpperCase();
+      const modal = document.getElementById('kioskExitModal');
+      const pinInput = document.getElementById('kioskPinInput');
+      const errorEl = document.getElementById('kioskExitError');
+      const cancelBtn = document.getElementById('kioskExitCancelBtn');
+      const submitBtn = document.getElementById('kioskExitSubmitBtn');
+
+      function openExitModal() {
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        errorEl.textContent = '';
+        pinInput.value = '';
+        setTimeout(() => pinInput.focus(), 20);
+      }
+      function closeExitModal() {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      async function submitUnlock() {
+        const pin = pinInput.value.trim();
+        if (!pin) {
+          errorEl.textContent = 'Informe o PIN.';
+          return;
+        }
+        submitBtn.disabled = true;
+        errorEl.textContent = 'Validando...';
+        const res = await apiPost('/api/kiosk/unlock', { pin });
+        submitBtn.disabled = false;
+        if (!res.ok || !res.data?.ok) {
+          errorEl.textContent = res.data?.error || 'PIN invalido.';
+          return;
+        }
+        window.location.href = '/admin';
+      }
+
+      document.addEventListener('keydown', (e) => {
+        const typed = [];
+        if (e.ctrlKey) typed.push('CTRL');
+        if (e.shiftKey) typed.push('SHIFT');
+        if (e.altKey) typed.push('ALT');
+        if (e.key && e.key.length === 1) typed.push(e.key.toUpperCase());
+        else if (e.key && e.key.length > 1) typed.push(e.key.toUpperCase());
+        if (typed.join('+') === comboTarget) openExitModal();
+        if (e.key === 'Escape' && modal.style.display === 'flex') closeExitModal();
+      });
+
+      cancelBtn.addEventListener('click', closeExitModal);
+      submitBtn.addEventListener('click', submitUnlock);
+      pinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitUnlock();
+      });
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeExitModal();
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clienteiro Live | Monitoramento em Tempo Real</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/favicon.png">
+  <meta property="og:title" content="Clienteiro PRO — Live Monitor">
+  <meta property="og:image" content="https://clienteiro.com.br/static/og-image.png">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07080A;
+      --panel: rgba(14, 16, 22, 0.78);
+      --accent: #FF7A18;
+      --accent-2: #24D7FF;
+      --accent-3: #F6D365;
+      --text: #F8FAFC;
+      --muted: rgba(248, 250, 252, 0.6);
+      --border: rgba(255, 122, 24, 0.2);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --shadow: 0 30px 70px rgba(0,0,0,0.6);
+      --font-sans: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 2.5rem clamp(1rem, 4vw, 3.5rem);
+      background-image:
+        radial-gradient(circle at 15% 10%, rgba(255, 122, 24, 0.18), transparent 45%),
+        radial-gradient(circle at 85% 20%, rgba(36, 215, 255, 0.18), transparent 40%);
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="120" height="120" filter="url(%23n)" opacity="0.04"/></svg>');
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 70px 70px;
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .brand {
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 122, 24, 0.08);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 700;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 12px rgba(239,68,68,0.6);
+      animation: pulse 1.4s infinite alternate;
+    }
+
+    .clock {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .live-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 2rem;
+    }
+
+    .hero-card,
+    .feed-card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 2.2rem;
+      backdrop-filter: blur(18px);
+    }
+
+    .kpi-label {
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .kpi-value {
+      font-size: clamp(4rem, 10vw, 7.5rem);
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent-3), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .kpi-sub {
+      margin-top: 0.8rem;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .kpi-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .kpi-box {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .kpi-box span {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-top: 0.4rem;
+    }
+
+    .kpi-box small {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .kpi-all {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .feed-card h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--accent-2);
+      margin-bottom: 1.2rem;
+    }
+
+    .feed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      max-height: 520px;
+      overflow: hidden;
+    }
+
+    .feed-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .feed-item.new {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 1px rgba(36, 215, 255, 0.4), 0 15px 30px rgba(36, 215, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .feed-company {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .feed-meta {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+
+    .feed-score {
+      font-family: var(--font-mono);
+      color: var(--accent-3);
+      font-weight: 700;
+    }
+
+    footer {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.5; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1.1); }
+    }
+
+    @media (max-width: 900px) {
+      .live-grid { grid-template-columns: 1fr; }
+      .feed-card { order: 2; }
+      .kpi-split { grid-template-columns: 1fr; gap: 1rem; }
+      .kpi-value { font-size: clamp(3.5rem, 10vw, 5rem); }
+      body { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="grid"></div>
+
+  <header>
+    <div class="brand">CLIENTEIRO LIVE</div>
+    <div class="live-badge"><span class="live-dot"></span> AO VIVO</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </header>
+
+  <main class="live-grid">
+    <section class="hero-card">
+      <div class="kpi-label">Leads Hoje</div>
+      <div class="kpi-value" id="total">0</div>
+      <div class="kpi-sub">diagn?sticos de autoridade gerados</div>
+      <div class="kpi-split">
+        <div class="kpi-box">
+          <small>Entregues</small>
+          <span id="impressos">0</span>
+        </div>
+        <div class="kpi-box">
+          <small>Aguardando</small>
+          <span id="aguardando">0</span>
+        </div>
+      </div>
+      <div class="kpi-all">Total geral no sistema: <strong id="total-all">0</strong></div>
+    </section>
+
+    <section class="feed-card">
+      <h3>Live Feed</h3>
+      <div class="feed-list" id="feed-list"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Clienteiro Pro ? Monitoramento em tempo real</div>
+    <div id="last-update">Atualizando...</div>
+  </footer>
+
+  <script>
+    let prevTotal = 0;
+    let seen = new Set();
+
+    function updateClock() {
+      const now = new Date();
+      const clock = document.getElementById('clock');
+      if (clock) clock.textContent = now.toLocaleTimeString();
+    }
+
+    async function refreshStats() {
+      try {
+        const res = await fetch('/api/live-stats');
+        const data = await res.json();
+
+        const totalEl = document.getElementById('total');
+        if (data.total !== prevTotal && totalEl) {
+          totalEl.style.transform = 'scale(1.06)';
+          setTimeout(() => { totalEl.style.transform = 'scale(1)'; }, 250);
+          prevTotal = data.total;
+        }
+
+        if (totalEl) totalEl.textContent = data.total;
+        const printedEl = document.getElementById('impressos');
+        const waitEl = document.getElementById('aguardando');
+        const allEl = document.getElementById('total-all');
+        if (printedEl) printedEl.textContent = data.printed;
+        if (waitEl) waitEl.textContent = data.waiting;
+        if (allEl) allEl.textContent = data.all_total || 0;
+
+        const last = document.getElementById('last-update');
+        if (last) last.textContent = `Atualizado ${new Date().toLocaleTimeString()}`;
+      } catch (e) {
+        const last = document.getElementById('last-update');
+        if (last) last.textContent = 'Sem conex?o com o servidor';
+      }
+    }
+
+    async function refreshFeed() {
+      try {
+        const res = await fetch('/api/live-feed?limit=10');
+        const data = await res.json();
+        const feed = document.getElementById('feed-list');
+        if (!data.ok || !feed) return;
+
+        feed.innerHTML = '';
+        if (!data.leads || data.leads.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'feed-item';
+          empty.innerHTML = '<div class="feed-company">Aguardando novos leads...</div><div class="feed-score">--</div>';
+          feed.appendChild(empty);
+          return;
+        }
+        data.leads.forEach((lead, idx) => {
+          const item = document.createElement('div');
+          const isNew = !seen.has(lead.id) && idx === 0;
+          seen.add(lead.id);
+          item.className = isNew ? 'feed-item new' : 'feed-item';
+
+          const company = lead.company_name || 'Lead';
+          const city = lead.city || 'Cidade';
+          const nicho = lead.nicho || 'Nicho';
+          const score = lead.clienteiro_score ?? '--';
+
+          item.innerHTML = `
+            <div>
+              <div class="feed-company">${company}</div>
+              <div class="feed-meta"><span>${city}</span><span>?</span><span>${nicho}</span></div>
+            </div>
+            <div class="feed-score">${score}</div>
+          `;
+          feed.appendChild(item);
+        });
+      } catch (e) {
+        // Silencioso
+      }
+    }
+
+    updateClock();
+    refreshStats();
+    refreshFeed();
+    setInterval(updateClock, 1000);
+    setInterval(refreshStats, 5000);
+    setInterval(refreshFeed, 7000);
+  </script>
+</body>
+</html>

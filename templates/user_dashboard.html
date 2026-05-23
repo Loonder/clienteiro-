@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clienteiro | Painel do Usuário</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #FF6A00;
+            --primary-glow: rgba(255, 106, 0, 0.4);
+            --bg: #0A0A0A;
+            --card: #141414;
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #a0a0a0;
+            --glass: rgba(20, 20, 20, 0.7);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 100% 0%, rgba(255, 106, 0, 0.05) 0%, transparent 40%);
+        }
+
+        /* --- Header --- */
+        header {
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
+        .logo i { color: var(--primary); }
+        .user-nav { display: flex; align-items: center; gap: 1.5rem; }
+        .user-role { font-size: 0.8rem; padding: 4px 10px; border-radius: 20px; background: var(--border); color: var(--primary); font-weight: 700; text-transform: uppercase; }
+        .btn-logout { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .btn-logout:hover { color: #ff4444; }
+
+        /* --- Main Content --- */
+        main { padding: 3rem 5%; max-width: 1400px; margin: 0 auto; }
+        
+        .welcome-sec { margin-bottom: 3rem; }
+        .welcome-sec h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .welcome-sec p { color: var(--text-muted); }
+
+        /* --- Grid Layout --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+        @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        /* --- Cards --- */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- Lead Gen Tool (Kiosk Lite) --- */
+        .gen-tool h2 { margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 1.4rem; }
+        .gen-tool h2 i { color: var(--primary); }
+        
+        .limit-card {
+            background: linear-gradient(135deg, rgba(255,106,0,0.1), transparent);
+            border: 1px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            display: flex; gap: 1rem; align-items: center;
+        }
+        .limit-info h4 { color: var(--primary); margin-bottom: 0.2rem; }
+        .limit-info p { font-size: 0.85rem; color: var(--text-muted); }
+
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
+        input {
+            width: 100%; background: #000; border: 1px solid var(--border);
+            padding: 1rem; border-radius: 12px; color: #fff; font-family: inherit;
+            transition: 0.3s;
+        }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+        .city-picker { position: relative; }
+        .city-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            z-index: 30;
+            display: none;
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 106, 0, 0.28);
+            border-radius: 14px;
+            background: #101010;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+            padding: 0.45rem;
+        }
+        .city-panel.active { display: block; }
+        .city-option {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            padding: 0.82rem 0.9rem;
+            border-radius: 10px;
+            text-align: left;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .city-option:hover, .city-option.active { background: rgba(255, 106, 0, 0.14); }
+        .city-option small { color: var(--text-muted); white-space: nowrap; }
+        .city-empty {
+            color: var(--text-muted);
+            padding: 0.85rem 0.9rem;
+            line-height: 1.35;
+            font-size: 0.86rem;
+        }
+        .city-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        
+        .btn-generate {
+            width: 100%; padding: 1.25rem; border: none; border-radius: 12px;
+            background: var(--primary); color: #000; font-weight: 700;
+            font-size: 1rem; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+        }
+        .btn-generate:hover { transform: translateY(-3px); box-shadow: 0 10px 30px var(--primary-glow); }
+        .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* --- Table --- */
+        .results-list h2 { margin-bottom: 2rem; font-size: 1.4rem; }
+        .lead-table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: left; padding: 1rem; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+        td { padding: 1.2rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        
+        .status-pill { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: rgba(0,209,255,0.1); color: #00d1ff; }
+        .score-pill { padding: 4px 8px; border-radius: 6px; background: rgba(255,106,0,0.1); color: var(--primary); font-weight: 700; }
+        
+        .btn-download { color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 0.4rem; transition: 0.3s; }
+        .btn-download:hover { text-decoration: underline; }
+
+        /* --- Upsell Modal-like Card --- */
+        .upsell-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10,10,10,0.9); backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 2rem; z-index: 10;
+        }
+        .upsell-overlay i { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; }
+        .upsell-overlay h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        .upsell-overlay p { margin-bottom: 2rem; color: var(--text-muted); }
+        .btn-upsell {
+            padding: 1rem 2rem; background: #25D366; color: #fff; border-radius: 12px;
+            text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 0.75rem;
+            transition: 0.3s;
+        }
+        .btn-upsell:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(37,211,102,0.3); }
+
+        /* --- Empty State --- */
+        .empty-state { text-align: center; padding: 4rem 0; color: var(--text-muted); }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+
+        /* --- Loading Overlays --- */
+        #loading-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            display: none; align-items: center; justify-content: center; z-index: 10000;
+        }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,106,0,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon.png">
+    <link rel="apple-touch-icon" href="/static/favicon.png">
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <i data-lucide="zap"></i> CLIENTEIRO
+        </div>
+        <div class="user-nav">
+            <span class="user-role">{{ nivel }}</span>
+            <span style="font-weight: 600;">{{ session.gestor_nome }}</span>
+            <a href="/logout" class="btn-logout"><i data-lucide="log-out"></i></a>
+        </div>
+    </header>
+
+    <main>
+        <div class="welcome-sec">
+            <h1>Olá, {{ session.gestor_nome }}! 👋</h1>
+            <p>Seja bem-vindo ao seu centro de prospecção estratégica.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Coluna 1: Ferramentas -->
+            <div class="gen-tool">
+                <div class="card" style="height: 100%;">
+                    {% if nivel == 'cliente' %}
+                        <!-- Limite de Uso -->
+                        <div class="limit-card">
+                            <i data-lucide="gauge" style="color: var(--primary);"></i>
+                            <div class="limit-info">
+                                <h4>{% if plano == 'pro' %}Plano Clienteiro Pro{% else %}Consumo de Teste{% endif %}</h4>
+                                <p>{% if plano == 'pro' %}Acesso PRO ativo! Aproveite sua mineração ilimitada.{% else %}Você utilizou {{ gen_count }} de 3 gerações gratuitas.{% endif %}</p>
+                            </div>
+                        </div>
+
+                        {% if gen_count >= 3 and plano != 'pro' %}
+                            <div class="upsell-overlay">
+                                <i data-lucide="lock"></i>
+                                <h3>Limite de Teste Atingido</h3>
+                                <p>Gostou dos resultados? Chame nosso time agora para liberar acesso ilimitado e escalar sua empresa.</p>
+                                <a href="https://wa.me/{{ bot_phone }}?text=Gostei%20do%20teste%20e%20quero%20o%20acesso%20completo!" class="btn-upsell" target="_blank">
+                                    <i data-lucide="message-circle"></i> LIBERAR AGORA
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if nivel == 'cliente' %}
+                        <h2><i data-lucide="rocket"></i> Novo Diagnóstico</h2>
+                        <form id="gen-form">
+                            <div class="form-group">
+                                <label>Nome da sua Empresa</label>
+                                <input type="text" name="company_name" placeholder="Ex: Minha Loja" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Segmento (Nicho Rankeado)</label>
+                                <select name="nicho" required style="width: 100%; background: #000; border: 1px solid var(--border); padding: 1rem; border-radius: 12px; color: #fff; font-family: inherit;">
+                                    <optgroup label="Saúde & Bem-Estar">
+                                        <option value="Clínica Médica">Clínica Médica & Especialistas</option>
+                                        <option value="Odontologia">Odontologia & Ortodontia</option>
+                                        <option value="Clínica de Estética">Clínica de Estética Avançada</option>
+                                        <option value="Nutrição">Nutrição & Endocrinologia</option>
+                                        <option value="Psicologia">Psicologia & Terapia</option>
+                                        <option value="Estúdio de Tatuagem">Estúdio de Tatuagem & Piercing</option>
+                                        <option value="Academia">Academia, Crossfit & Lutas</option>
+                                        <option value="Salão de Beleza">Salão de Beleza & Barbearia</option>
+                                        <option value="Spa">Spa & Massoterapia</option>
+                                    </optgroup>
+                                    <optgroup label="Comércio & Gastronomia">
+                                        <option value="Restaurante">Restaurante, Pizzaria & Sushi</option>
+                                        <option value="Hamburgueria">Hamburgueria & Fast Food</option>
+                                        <option value="Cafeteria">Cafeteria & Padaria</option>
+                                        <option value="E-commerce">E-commerce & Lojas Virtuais</option>
+                                        <option value="Loja de Roupas">Loja de Roupas & Moda</option>
+                                        <option value="Supermercado">Supermercado & Conveniência</option>
+                                        <option value="Pet Shop">Pet Shop & Clínica Veterinária</option>
+                                        <option value="Loja de Suplementos">Loja de Suplementos Naturais</option>
+                                        <option value="Loja de Informática">Eletrônicos & Informática</option>
+                                    </optgroup>
+                                    <optgroup label="Serviços Profissionais">
+                                        <option value="Advocacia">Escritório de Advocacia</option>
+                                        <option value="Contabilidade">Escritório de Contabilidade</option>
+                                        <option value="Arquitetura">Arquitetura & Design de Interiores</option>
+                                        <option value="Engenharia">Engenharia & Empreiteiras</option>
+                                        <option value="Imobiliária">Imobiliária & Corretores (High-ticket)</option>
+                                        <option value="Despachante">Despachante & Auto Escola</option>
+                                        <option value="Agência de Marketing">Agência de Marketing & Publicidade</option>
+                                        <option value="Consultoria">Consultoria Empresarial & RH</option>
+                                    </optgroup>
+                                    <optgroup label="Serviços Locais & Motor">
+                                        <option value="Oficina Mecânica">Oficina Mecânica & Funilaria</option>
+                                        <option value="Estética Automotiva">Estética Automotiva & Lava Rápido</option>
+                                        <option value="Concessionária">Concessionária & Venda de Veículos</option>
+                                        <option value="Construtora">Construtora & Material de Construção</option>
+                                        <option value="Energia Solar">Empresas de Energia Solar</option>
+                                        <option value="Ar Condicionado">Climatização & Ar Condicionado</option>
+                                        <option value="Vidraçaria">Vidraçaria & Marcenaria</option>
+                                        <option value="Dedetizadora">Dedetizadora & Limpeza</option>
+                                    </optgroup>
+                                    <optgroup label="Educação">
+                                        <option value="Educação Básica">Educação (Cursos, Escolas Particulares)</option>
+                                        <option value="Idioma">Escola de Idiomas</option>
+                                        <option value="Música e Artes">Escola de Música & Artes</option>
+                                        <option value="Curso Profissionalizante">Cursos Profissionalizantes</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cidade de Foco (Mapeadas ou Nova)</label>
+                                <div class="city-picker" id="cityPicker">
+                                    <input type="text" name="city" id="cityInput" autocomplete="off" placeholder="Digite ou selecione a cidade..." required>
+                                    <div class="city-panel" id="cityPanel" role="listbox" aria-label="Cidades disponiveis"></div>
+                                </div>
+                                <p class="city-hint">
+                                    Cidades ja mapeadas aparecem primeiro. Se for nova, o sistema tenta gerar com os dados disponiveis.
+                                </p>
+                            </div>
+                            <div class="form-group">
+                                <label>Seu WhatsApp</label>
+                                <input type="text" name="user_phone" placeholder="Ex: 11999999999" required>
+                            </div>
+                            <button type="submit" class="btn-generate" {% if gen_count >= 3 and plano != 'pro' %}disabled{% endif %}>
+                                GERAR INTELIGÊNCIA <i data-lucide="arrow-right"></i>
+                            </button>
+                        </form>
+                    {% else %}
+                        <!-- Consultor View -->
+                        <h2><i data-lucide="command"></i> Ferramentas Operacionais</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">Você tem acesso à visualização completa dos leads gerados para suporte e impressão acadêmica.</p>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div class="limit-card" style="border-color: rgba(0,209,255,0.3);">
+                                <i data-lucide="printer" style="color: #00d1ff;"></i>
+                                <div class="limit-info">
+                                    <h4 style="color: #00d1ff;">Acesso à Impressão</h4>
+                                    <p>Permissão para gerar segundas vias de relatórios.</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Coluna 2: Resultados -->
+            <div class="results-list">
+                <div class="card">
+                    <h2><i data-lucide="database" style="color: var(--primary); margin-right: 0.5rem;"></i> Seus Leads & Relatórios</h2>
+                    
+                    <div class="lead-table-container">
+                        {% if leads %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Empresa/Nicho</th>
+                                        <th>Score</th>
+                                        <th>Relatório (PDF)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lead in leads %}
+                                        <tr>
+                                            <td>{{ lead.timestamp.strftime('%d/%m/%Y') }}</td>
+                                            <td>
+                                                <div style="font-weight: 600;">{{ lead.company_name }}</div>
+                                                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ lead.nicho }} - {{ lead.city }}</div>
+                                            </td>
+                                            <td><span class="score-pill">{{ lead.clienteiro_score }}%</span></td>
+                                            <td>
+                                                <a href="/download/{{ lead.pdf_path }}" class="btn-download" target="_blank">
+                                                    <i data-lucide="file-text"></i> Abrir
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="empty-state">
+                                <i data-lucide="inbox"></i>
+                                <p>Nenhum resultado gerado ainda.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        const form = document.getElementById('gen-form');
+        const loading = document.getElementById('loading-overlay');
+        const cityInput = document.getElementById('cityInput');
+        const cityPanel = document.getElementById('cityPanel');
+        const cityOptions = {{ db_cidades|default([])|tojson }};
+
+        function normalizeCityText(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        function titleCity(value) {
+            return String(value || '').replace(/\w\S*/g, (txt) => (
+                txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase()
+            ));
+        }
+
+        function renderCityOptions() {
+            if (!cityInput || !cityPanel) return;
+            const query = normalizeCityText(cityInput.value);
+            const matches = cityOptions
+                .filter((city) => normalizeCityText(city).includes(query))
+                .slice(0, 8);
+
+            cityPanel.innerHTML = '';
+            if (!matches.length) {
+                const empty = document.createElement('div');
+                empty.className = 'city-empty';
+                empty.textContent = cityInput.value.trim()
+                    ? 'Cidade nova. Pressione Enter ou continue digitando para usar exatamente esse nome.'
+                    : 'Digite para buscar nas cidades ja mapeadas.';
+                cityPanel.appendChild(empty);
+                cityPanel.classList.add('active');
+                return;
+            }
+
+            matches.forEach((city) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'city-option';
+                btn.innerHTML = `<span>${titleCity(city)}</span><small>Mapeada</small>`;
+                btn.addEventListener('mousedown', (event) => {
+                    event.preventDefault();
+                    cityInput.value = city;
+                    cityPanel.classList.remove('active');
+                });
+                cityPanel.appendChild(btn);
+            });
+            cityPanel.classList.add('active');
+        }
+
+        if (cityInput && cityPanel) {
+            cityInput.addEventListener('focus', renderCityOptions);
+            cityInput.addEventListener('input', renderCityOptions);
+            cityInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') cityPanel.classList.remove('active');
+                if (event.key === 'Enter' && cityPanel.classList.contains('active')) {
+                    cityPanel.classList.remove('active');
+                }
+            });
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('#cityPicker')) {
+                    cityPanel.classList.remove('active');
+                }
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loading.style.display = 'flex';
+                
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                // user_name é usado no sub-prompt de geração para contexto
+                data.user_name = "{{ session.gestor_nome }}";
+                data.can_call = 'true'; // Auto-consentimento para usuários logados
+
+                try {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    const resp = await fetch('/submit', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const res = await resp.json();
+                    
+                    if (res.ok) {
+                        window.location.reload(); 
+                    } else if (res.limit_reached) {
+                        alert(res.error);
+                        window.location.reload();
+                    } else {
+                        alert('Erro ao gerar: ' + res.error);
+                    }
+                } catch (err) {
+                    alert('Falha na comunicação com o servidor.');
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
