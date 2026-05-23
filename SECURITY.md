@@ -24,7 +24,7 @@ git status --short --ignored
 git ls-files | rg "(\\.env|\\.db|\\.sqlite|qrcode|instance\\.json|credentials|token|auth)"
 rg -n --hidden -S "(SECRET|PASSWORD|TOKEN|API_KEY|PRIVATE KEY|DATABASE_URL|postgresql://)" -g "!.git" -g "!.venv" -g "!node_modules"
 pytest -q
-bandit -r app.py core services test_db.py -x tests -q --severity-level high
+bandit -r app.py core services -x tests -q --severity-level high
 safety check -r requirements.txt
 npm --prefix whatsapp_bot audit --audit-level=high --omit=dev
 npm --prefix roulette_webhook audit --audit-level=high --omit=dev

@@ -152,7 +152,7 @@ pytest -q
 Auditoria Python:
 
 ```bash
-bandit -r app.py core services test_db.py -x tests -q --severity-level high
+bandit -r app.py core services -x tests -q --severity-level high
 safety check -r requirements.txt
 ```
 
