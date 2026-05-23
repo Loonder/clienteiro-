@@ -322,6 +322,8 @@ _BANNED_IPS = set()
 def sync_blacklist():
     """Carrega IPs banidos do banco para a memÃ³ria (Performance)."""
     global _BANNED_IPS
+    if env_bool('SKIP_DB_INIT', False):
+        return
     try:
         conn = get_db_connection()
         with conn.cursor() as cur:
